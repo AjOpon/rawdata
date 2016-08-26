@@ -5,15 +5,18 @@
  XLSX = require('XLSX'),
  ch_rawdata = require('../controllers/ch_rawdata');
 
- rfilename = 'mnchrawdata.xlsx';
+ rfilename = 'sec1_temp2.xlsx';
  readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
- wfilename= 'sec1_test.xlsx';
- writeFile= path.join(__dirname+ "/uploads/"+ wfilename) ;
+ wfilename= 'SEC1_test.xlsx';
+ write_filepath= path.join(__dirname+ "/uploads/"+ wfilename) ;
 
  console.log('Executing excel read route');
  console.log('file location : '+ readfile);
  var workbook = XLSX.readFile(readfile);
  console.log('reading from ' + rfilename);
+
+ var fs = require('fs');
+
 
 module.exports=function(app,express){
  
@@ -88,8 +91,19 @@ setupSurveyExcelSection = function(array) {
  	wbtest = ch_surv_data.workbook_test.wb;
  	if (typeof wbtest != null && typeof wbtest!= undefined) {
  		console.log('Book was defined , attempting to write');
- 		bk1=XLSX.write(wbtest, {type:'xlsx'});
- 		res.downlooad(bk1);
+ 		bk1=XLSX.writeFile(wbtest, write_filepath);
+ 		if(typeof blk1 != undefined && typeof blk1 != null ){
+ 			console.log('trying to write blk1 to a file ')
+ 			fs.writeFileSync( bk1); 
+ 			res.sendFile(blk1);
+ 			console.log('File written...I think');
+ 		}
+ 		else
+ 		{
+ 			console.log('blk1 was undefined/null ');
+ 		}
+ 		
+ 		
 
  	}else{
  		console.log('Book was undefined');

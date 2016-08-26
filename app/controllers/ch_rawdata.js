@@ -108,17 +108,25 @@ ch_rawdata.setFacilitySummaryExcel=function(wbk,ch_surv,s_datakeys){
 
 					   
 						var str ;
-					    for (var j = m_index ; j <= 25; j++) {
+					    for (var j = m_index ; j <= 29; j++) {
 					    	var row_t = 9;
+
 					    	for (var col_key = 0; col_key < s_datakeys[0].length; col_key++) {
 					    		for (var i = 0; i < s_datakeys.length; i++) {
 					    					col_off = col_key + 2;
 					    					if(col_key == (s_datakeys[0].length - 2) || col_key>(s_datakeys[0].length - 2)){
 					    						col_off = s_datakeys[0].length - 2;
 					    					}
-					    					
+					    					row_ts= row_t.toString();
 							    			str = s_datakeys[i][col_off];
-							    			worksheet[alpha[j]+ row_t] = {v: str, t: 's'};
+							    			var index_aa = alpha[j]+ row_ts;
+							    			console.log('s_datakeys[i][col_off]');
+							    			console.log('s_datakeys['+i+']['+col_off+']');
+							    			console.log(index_aa);
+							    			console.log( index_aa +' Is current cell address on worksheet i.e worksheet[alpha[j]+ row_t]');
+							    			console.log('worksheet['+'alpha['+j+']+ ' + row_t+']');
+							    			console.log(worksheet[index_aa]);
+							    			worksheet[index_aa] = {v: str, t: 's'};
 							    			row_t++;//
 							    			 
 							    		
@@ -126,7 +134,7 @@ ch_rawdata.setFacilitySummaryExcel=function(wbk,ch_surv,s_datakeys){
 					    	};
 					    	
 					    };
-					    
+
 					   /* for (; j < 30; j++) {
 					    row_t = 9;
 					    for (var col_key2 = 0; col_key2 < s_datakeys[0].length; col_key2++) {
@@ -212,3 +220,8 @@ ch_rawdata.getValidCHAssessments = function(err, chassess){
 };
 
 module.exports= ch_rawdata;
+
+
+
+
+

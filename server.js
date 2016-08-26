@@ -48,7 +48,7 @@ app.use(express.static(__dirname + '/public'));
 
 //one route to my index file (landing page)
 app.get('*', function(req,res){
-	res.sendFile(path.join(__dirname + '/public/app/views/home.html'));
+	res.sendFile(path.join(__dirname + '/public/home.html'));
 });
 
 //specify express port and host address
