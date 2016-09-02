@@ -2,59 +2,66 @@
 
 var mongoose=require('mongoose'),
  Schema = mongoose.Schema;
- /*bcrypt = require('bcrypt-nodejs');*/
- /*var usrSchema= new Schema({
- 	name: String,
- 	username: {type: String, required: true, index: {unique: true}},
- 	password: {type:String , required: true, select: false}
- 	
- });*/
-var facilitySchema = new Schema ({
-	Facility_ID: { type: Number, required:true, 
-			index:{unique:true} },
-	Assessment_Term: { type: String, required:true , index:true } ,
-	Date: Date,
-	Survey:{type: String,required:true, index:true  },
-	UserId: {type: String, required: true } ,
-	Status: {type: String, required: true, index:true },
-	PartID: Number,
-	updated_at:{ type: Date,required:true},
-	created_at:{ type: Date,required:true},
-	Data:{}
 
-}, { collection: 'assessments'});
+var FacilitySchema = new Schema ({
+    ANC : String, 
+    ART : String, 
+    BEOC : String, 
+    BLOOD : String, 
+    Beds : Number, 
+    CAES_SEC : String, 
+    CEOC : String, 
+    C_IMCI : String, 
+    Constituency : String, 
+    Cots : Number, 
+    County : String, 
+    DescriptionOfLocation : String, 
+    District : String, 
+    Division: String, 
+    EPI: String, 
+    FP : String, 
+    FacilityCode : Number, 
+    FacilityName : String, 
+    GROWM : String, 
+    HBC : String, 
+    HCT : String, 
+    IPD : String, 
+    InCharge : String, 
+    Index : Number, 
+    JobTitleofInCharge : String, 
+    Location : String, 
+    NearestTown : String, 
+    OPD: String, 
+    OUTREACH: String, 
+    OfficalAddress : String, 
+    OfficalAlternateNo : String, 
+    OfficalEmail : String, 
+    OfficalFAx : String, 
+    OfficalLandline: String, 
+    OfficalMobile: String, 
+    Open24Hours : String, 
+    OpenWeekends : String, 
+    OperationalStatus: String, 
+    Owner: String, 
+    PMTCT : String, 
+    PostCode : String, 
+    Province : String, 
+    RAD_XRAY : String, 
+    RHTC_RHDC : String, 
+    SubCounty : String, 
+    SubLocation: String, 
+    TB_DIAG : String, 
+    TB_LABS : String, 
+    TB_TREAT: String, 
+    Tier : String, 
+    Town : String, 
+    Type : String, 
+    YOUTH: String, 
+    backed_up: Number, 
+    created_at: { type: Date,required:true}, 
+    updated_at : { type: Date,required:true}
+
+}, { collection: 'Facilities'});
 
 
-/*PersonSchema.pre('save',function(next){
-	var person = this;
-	if(!person.isModified('password')) return next();
-	bcrypt.hash(person.password,null,null,function(err,hash){
-		if(err) return next(err);
-		person.password = hash;
-		next();
-	});
-});*/
-
-
-/*PersonSchema.methods.comparePassword = function(password){
-	var person = this;
-	return bcrypt.compareSync(password, person.password);
-};*/
-
-module.exports = mongoose.model('Assessment', AssessmentSchema);
-/*usrSchema.pre('save',function(next){
-	var user= this;
-	if (!user.isModified('password')) return next();
-	bcrypt.hash(user.password, null, null, function(err,hash){
-	if (err) return next(err);
-	user.password=hash;
-	next();
-	})
-});
-
-usrSchema.methods.comparePassword= function(password){
-	var user = this ;
-	return bcrypt.compareSync(password, user.password);
-};
-
-module.exports = mongoose.model('Usr',usrSchema);*/
+module.exports = mongoose.model('Facility', FacilitySchema);

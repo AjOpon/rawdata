@@ -104,10 +104,8 @@ setupSurveyExcelSection = function(array) {
  	//surveydata_check(ch_surv_data.firstAssess,ch_surv_data.datakeys);
  	ch_surv_data.col_blk1 = ch_rawdata.getSecDataKeys(ch_surv_data.datakeys,'CHV2SEC1BLK1RW');// Section 1 datakeys according to rows. 
  	ch_surv_data.SecRowsArray= makeRowsArray(ch_surv_data.col_blk1, ch_surv_data.firstAssess);//get array row arrays with respective columns
- 	ch_rawdata.FaciSumCurSurv = ch_surv_data.firstAssess;
  	ch_surv_data.workbook_first = ch_rawdata.setFacilitySummaryExcel(workbook, ch_surv_data.firstAssess, ch_surv_data.SecRowsArray, celladdrs);
  	wb_first = ch_surv_data.workbook_first;
- 	//wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, ch_surv_data.firstAssess, ch_surv_data.SecRowsArray, celladdrs);
 
  	var cell_srt_de = XLSX.utils.decode_cell(celladdrs.col_srt);
  	console.log('cell_srt_de: '+ cell_srt_de );
@@ -133,23 +131,29 @@ setupSurveyExcelSection = function(array) {
  		console.log('next survey at cur_celladdrs.col_srt = '+ cur_celladdrs.col_srt+ ' , cur_celladdrs.srv_colsrt = '+ cur_celladdrs.srv_colsrt );
  		console.log('next survey at cur_celladdrs.col_end = '+ cur_celladdrs.col_end + ', cur_celladdrs.srv_colend = ' + cur_celladdrs.srv_colend );
  		cur_Assess = array.shift();
- 		ch_rawdata.FaciSumCurSurv = cur_Assess;
  		cur_Datakeys = Object.keys(cur_Assess.Data);
  		cur_RowswColsArr=  makeRowsArray(ch_surv_data.col_blk1, cur_Assess);
  		wb_first = ch_rawdata.setFacilitySummaryExcel(wb_first, cur_Assess, cur_RowswColsArr, cur_celladdrs);
- 		//wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, cur_Assess, cur_RowswColsArr, cur_celladdrs);
  	};
 
  	if (typeof wb_first != null && typeof wb_first!= undefined) {
  		console.log('Book was defined , attempting to write');
-
- 		write_dets = ch_rawdata.writeSec1Book(wb_first,write_filepath );
+ 		
+ 		write_dets = ch_rawdata.writeSec1Book.(wb_first,writepath_sec1 );
  		//bk1=XLSX.writeFile(wb_first, write_filepath);
  		if(typeof write_dets != undefined && typeof write_dets != null ){
  			//fs.writeFileSync( bk1); 
  			console.log('should be in the folder ' + write_dets.write_filepath);
- 			res.download(write_dets.write_filepath);
- 			console.log('File written and sent...');
+ 			var excel_wrt_stats = isStatSync(write_dets.write_filepath);
+ 			console.log('excel_wrt_stats: '+ excel_wrt_stats );
+ 			if(excel_wrt_stats){
+ 				console.log('content type : '+ res.get('Content-Type'));
+ 				res.download(write_dets.write_filepath);
+ 				console.log('File written and sent...I think');
+ 			}
+ 			else{
+ 				console.log('apparently the file couldnt be found');
+ 			}
  		}
  		else
  		{
