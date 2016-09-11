@@ -112,13 +112,14 @@ function writeSec1Book ( wb_sec1,writepath_sec1 ){
 };
 
 ch_rawdata.getFaciDets = function (err, facilitydets){
+	console.log('getFaciDets has been called');
 	if(err){
 		fac_info.faci_dets = undefined;
 		return console.log(err);
 	}
 	else{
 		if(facilitydets != undefined && facilitydets != null){
-			fac_info.faci_dets = Object.keys(facilitydets);
+			fac_info.faci_dets = facilitydets;
 			ch_surv_cur = this.FaciSumCurSurv;  
 			console.log('ch_surv_cur: ');
 			console.log(ch_surv_cur);
@@ -129,7 +130,12 @@ ch_rawdata.getFaciDets = function (err, facilitydets){
 						if(Array.isArray(fac_info.assess_dets)){
 						console.log('assess_dets : ');
 						console.log(fac_info.assess_dets);
-						var faciliArr = fac_info.faci_dets, assessArr = fac_info.assess_dets;
+						var faciliArr = [fac_info.faci_dets[County],fac_info.faci_dets[SubCounty],
+						fac_info.faci_dets[FacilityCode],fac_info.faci_dets[FacilityName],
+						fac_info.faci_dets[Tier], 
+						fac_info.faci_dets[Type],
+						fac_info.faci_dets[Owner]], 
+						assessArr = fac_info.assess_dets;
 						comp_dets= faciliArr.concat(assessArr);
 						console.log('comp_dets: ');
 						console.log(comp_dets);
@@ -146,12 +152,26 @@ ch_rawdata.getFaciDets = function (err, facilitydets){
 						console.log('srv_cur  = '+ srv_cur);
 
 						var srv_celladd_arr= [];
-						
+						var count_faciComp  = 0;
 						for (; srv_cur <= srv_last_col;) {
+
 							var srvcell= {c:srv_cur,r:srv_cur_rw};
 								var en_srvcell = XLSX.utils.encode_cell(srvcell);
-								srv_celladd_arr.push(en_srvcell);
+								/*srv_celladd_arr.push(en_srvcell);
+								*/
+								var info_wb = this.FaciSumCurWb;
+								if(typeof info_wb != undefined && typeof info_wb != null){
+								var survInfo = comp_dets[count_faciComp];	
+								var firstinfo_sheet = info_wb.SheetNames[0], info_sheet = info_wb[firstinfo_sheet];
+								info_sheet[en_srvcell] = {v:survInfo, t:'s'};;
+								}
+								else{
+									break;
+									return console.log('FaciSumCurWb appears empty');
+								}
 								srv_cur++;
+
+
 
 						};
 
@@ -159,6 +179,8 @@ ch_rawdata.getFaciDets = function (err, facilitydets){
 						else{
 							return console.log('fac_info.assess_dets is not an array');
 						}
+						console.log('returning FaciSumCurWb from getFaciDets');
+						return this.FaciSumCurWb;
 			 		
 		}
 		else{
@@ -168,7 +190,6 @@ ch_rawdata.getFaciDets = function (err, facilitydets){
 	}
 
 };
-
 
 
 ch_rawdata.getSecDataKeys = function(fsum_datakeys,pattern){
@@ -304,7 +325,8 @@ ch_rawdata.setFacilitySummaryExcel=function(wbk,ch_surv,s_datakeys,srt_stp){
 					/* console.log('start column index : '+  m_index );
 					 console.log('end column index : '+  ad_index);*/
 
-
+					 work_buch.wb = wbk;
+				return work_buch.wb;
 
 				} else{
 
@@ -312,8 +334,7 @@ ch_rawdata.setFacilitySummaryExcel=function(wbk,ch_surv,s_datakeys,srt_stp){
 
 				}
 				//work_buch.lastRow = x;
-				work_buch.wb = wbk;
-				return work_buch.wb;
+				
 
 			} else {
 				console.log('Error with ch_surv / wbk /s_datakeys make sure they are variables with values');
@@ -342,7 +363,6 @@ ch_rawdata.setFacilitySummaryExcel=function(wbk,ch_surv,s_datakeys,srt_stp){
 
 });*/
 
-};
 
 module.exports= ch_rawdata;
 

@@ -26,17 +26,6 @@ module.exports=function(app,express){
 rawdataRouter.route('/ch_excel')
  .get(function(req,res){
 
-  function isStatSync(aPath) {
-  try {
-    return fs.statSync(aPath).isFile();
-  } catch (e) {
-    if (e.code === 'ENOENT') {
-      return false;
-    } else {
-      throw e;
-    }
-  }
-};
 
   function makeRowsArray(secRowsCols, assessment){
   	console.log('makeRowsArray function called');
@@ -92,6 +81,7 @@ setupSurveyExcelSection = function(array) {
  	console.log('Beginning to run through array for provided survey');	
  	x = 0;
  	ch_surv_data.mapdata=[];
+ 	ch_rawdata.all_surveys = array;
 
 //MAIN FUNCTION CALLS
  	var celladdrs = {col_srt: 'M9', col_end: 'AD9', srv_colsrt: 'B9', srv_colend:'L9'};
@@ -105,9 +95,14 @@ setupSurveyExcelSection = function(array) {
  	ch_surv_data.col_blk1 = ch_rawdata.getSecDataKeys(ch_surv_data.datakeys,'CHV2SEC1BLK1RW');// Section 1 datakeys according to rows. 
  	ch_surv_data.SecRowsArray= makeRowsArray(ch_surv_data.col_blk1, ch_surv_data.firstAssess);//get array row arrays with respective columns
  	ch_rawdata.FaciSumCurSurv = ch_surv_data.firstAssess;
+ 	console.log('Showing FaciSumCurSurv');
+ 	console.log(ch_rawdata.FaciSumCurSurv);
  	ch_surv_data.workbook_first = ch_rawdata.setFacilitySummaryExcel(workbook, ch_surv_data.firstAssess, ch_surv_data.SecRowsArray, celladdrs);
+
  	wb_first = ch_surv_data.workbook_first;
- 	//wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, ch_surv_data.firstAssess, ch_surv_data.SecRowsArray, celladdrs);
+ 	ch_rawdata.FaciSumCurWb = wb_first;
+ 	console.log('next up should be the setFaciSumInfoExcel');
+ 	wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, ch_surv_data.firstAssess, ch_surv_data.SecRowsArray, celladdrs);
 
  	var cell_srt_de = XLSX.utils.decode_cell(celladdrs.col_srt);
  	console.log('cell_srt_de: '+ cell_srt_de );
@@ -137,12 +132,14 @@ setupSurveyExcelSection = function(array) {
  		cur_Datakeys = Object.keys(cur_Assess.Data);
  		cur_RowswColsArr=  makeRowsArray(ch_surv_data.col_blk1, cur_Assess);
  		wb_first = ch_rawdata.setFacilitySummaryExcel(wb_first, cur_Assess, cur_RowswColsArr, cur_celladdrs);
- 		//wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, cur_Assess, cur_RowswColsArr, cur_celladdrs);
+ 		ch_rawdata.FaciSumCurWb = wb_first;
+ 		wb_first = ch_rawdata.setFaciSumInfoExcel(wb_first, cur_Assess, cur_RowswColsArr, cur_celladdrs);
  	};
 
  	if (typeof wb_first != null && typeof wb_first!= undefined) {
  		console.log('Book was defined , attempting to write');
-
+ 		var sheet_nm = wb_first.SheetNames[0];
+ 		wb_first.Sheets[sheet_nm]['!ref'] = "A1:AH10000"; 
  		write_dets = ch_rawdata.writeSec1Book(wb_first,write_filepath );
  		//bk1=XLSX.writeFile(wb_first, write_filepath);
  		if(typeof write_dets != undefined && typeof write_dets != null ){
@@ -243,7 +240,7 @@ surveydata_check = function(assessment1,datakeys){
  			setupSurveyExcelSection(chassess);
  			//res.send(ch_surv_data);
  			//chassessments = chassess;
- 			return chassess;
+ 			//return chassess;
  		}
  	/*Assessment.
  	find(query_s, function(err,assessments){
@@ -271,7 +268,7 @@ surveydata_check = function(assessment1,datakeys){
 
 //query the ch surveys
 var quer= Assessment.find().where('Survey').equals('CHV2').where('Status').equals('Submitted').limit(100);
-	
+console.log('/ch_excel route is about to query for assessments');
 assessmo =  quer.exec(getValidCHAssessments);
 console.log(assessmo);
 
