@@ -36,7 +36,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 //CONFIGURE API ROUTES
- rawdataRouter = require('./app/routes/rawdata_old')(app, express);
+ rawdataRouter = require('./app/routes/rawdata')(app, express);
 
 app.use('/rawdata', rawdataRouter);
 

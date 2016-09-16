@@ -1,7 +1,6 @@
 //assessment model schema
-
-var mongoose=require('mongoose'),
- Schema = mongoose.Schema;
+var mongoose=require('mongoose');
+ var Schema = mongoose.Schema;
  /*bcrypt = require('bcrypt-nodejs');*/
  /*var usrSchema= new Schema({
  	name: String,
