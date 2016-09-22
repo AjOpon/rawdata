@@ -6,6 +6,10 @@
  RawData = require('../controllers/ch_rawdata');
 var fs = require('fs');
  var sync = require('synchronize');
+
+
+
+ //req objects to be set by client side controller
  rfilename = 'sec1_temp2.xlsx';
  readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
  wfilename= 'SEC1_StaffTraining.xlsx';
@@ -26,6 +30,7 @@ module.exports=function(app,express){
 
 rawdataRouter.route('/ch_excel')
  .get(function(req,res){
+ 	//setup from the req object to decide what rawdata to present e.g Survey Version, Term, County, Num of Surveys 
 var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
 	filepath_wb: write_filepath,
 	workbk: workbook
@@ -33,8 +38,9 @@ var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'
 };
 console.log('setup.workbk is: '+ typeof setup.workbk);
 var ch_rawdata = new RawData(setup);
+
 sync.fiber(function(){
-	write_dets1 =sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
+	write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
 	console.log('write_dets1 is : '+ typeof write_dets1);
 	console.log(write_dets1.write_filepath);
 	if(typeof write_dets1 === 'object'){
@@ -42,7 +48,7 @@ sync.fiber(function(){
 		res.download(write_dets1.write_filepath);
 	}else{
 		res.send({
-			success: false,
+			success: false ,
 			write_dets_obj: write_dets1
 		});
 	}
