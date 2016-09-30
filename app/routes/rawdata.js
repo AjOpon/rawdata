@@ -13,7 +13,9 @@ var fs = require('fs');
  rfilename = 'sec1_temp2.xlsx';
  readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
  wfilename= 'SEC1_StaffTraining.xlsx';
- write_filepath= path.join(__dirname+ "/uploads/"+ wfilename) ;
+ 
+ half_filepath = "/uploads/" ; 
+ write_filepath= path.join(__dirname+ half_filepath) ;
 
 
  console.log('Executing excel read route');
@@ -29,27 +31,46 @@ module.exports=function(app,express){
  var rawdataRouter = express.Router();
 
 rawdataRouter.route('/ch_excel')
- .get(function(req,res){
+ .post(function(req,res){
  	//setup from the req object to decide what rawdata to present e.g Survey Version, Term, County, Num of Surveys 
+
+
+var raw_file_options  = req.body;
 var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
 	filepath_wb: write_filepath,
-	workbk: workbook
+	h_path : wfilename,
+	workbk: workbook,
+	wb_options: raw_file_options
 
 };
+
 console.log('setup.workbk is: '+ typeof setup.workbk);
+console.log('Showing the request body');
+console.log(req.body); // raw_data obj from client
 var ch_rawdata = new RawData(setup);
+
+
 
 sync.fiber(function(){
 	write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
 	console.log('write_dets1 is : '+ typeof write_dets1);
-	console.log(write_dets1.write_filepath);
-	if(typeof write_dets1 === 'object'){
+	console.log(req.get('Content-Type'));
+	
+	if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
+		console.log(write_dets1.write_filepath);
 		console.log('Found xlsx file for download');
-		res.download(write_dets1.write_filepath);
+		//res.download(write_dets1.write_filepath);
+		res.send({ write_path :write_dets1.h_path ,
+			success : true,
+			wbname: h_path
+
+		});
+
 	}else{
+		console.log('Undefined writedets , issues within');
 		res.send({
 			success: false ,
-			write_dets_obj: write_dets1
+			message: 'something went wrong'
 		});
 	}
 });
@@ -94,6 +115,35 @@ else{
 }*/
 
 });
+
+rawdataRouter.route('/ch_download/:filename')
+	.get(function(req,res){
+		if(typeof req.params != undefined && typeof req.params != null){
+		  var curfilename =  req.params.filename;
+		  curwrite_filepath= path.join(__dirname+ half_filepath + curfilename) ;
+		  console.log('Sending file for download');
+		  sync.fiber(function(){
+		 				var excel_wrt_stats = sync.await(fs.stat(curwrite_filepath, sync.defer()));
+			 			console.log('excel_wrt_stats: '+ typeof excel_wrt_stats );
+			 			console.log(excel_wrt_stats);
+			 			if(excel_wrt_stats){
+			 				//console.log('content type : '+ res.get('Content-Type'));
+			 				//res.download(write_filepath);
+			 				console.log('File Valid');
+			 				res.download(curwrite_filepath);
+			 				//return write_dets;
+			 			}
+			 			else{
+			 				res.send({success: false, message: 'No file found'});
+			 				return console.log('apparently the file couldnt be found');
+			 			}
+		 			});
+		  //res.download(write_dets1.write_filepath);
+		}else{
+			return console.log('Params was empty');
+		}
+		 
+	});
 
 /*
 

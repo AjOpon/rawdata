@@ -24,3 +24,7 @@
 	text-align: center;
 	font-weight: bold;
 }
+
+#FiltCounty, #FiltVer, #FiltMax, #FiltTerm {
+	color: #29ab29;
+}

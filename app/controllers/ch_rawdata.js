@@ -7,11 +7,14 @@
  var sync = require('synchronize');
  var Assessment = require('../models/assessment');
  var Facility = require('../models/facility');
+ const ver1 = 'CHV1', ver2 = 'CHV2';
 
  function CH_RawData(setupInfo){
   this.cells= setupInfo.cells;
   this.wb_filepath = setupInfo.filepath_wb;
+  this.h_path = setupInfo.h_path;
   this.wb = setupInfo.workbk;
+  this.wb_options = setupInfo.wb_options;
   this.cur_surv = undefined;
   this.cur_faciDets  = undefined;
   this.sec_rows = undefined;
@@ -19,7 +22,82 @@
 
  };
 
+function getWbQuery(options){
+	'use strict';
+	var wb_options = options;
+	console.log('begining gerWbQuery');
+	 console.log(wb_options);
+ 	let query_options = [];//['surv_ver', max, {..tog}]
+	switch (wb_options.surv_ver){
+ 		 case 'V1':
+ 		 	console.log('V1 selected');
+ 		 	query_options.push(ver1); //set query version
+ 		 	query_options.push(parseInt(wb_options.surv_max));//set query max num
+ 		 	break;
+ 		 case 'V2':
+ 		 	query_options.push(ver2);
+ 		 	query_options.push(parseInt(wb_options.surv_max));
 
+ 		 	break;
+ 		 case 'All':
+ 		 	query_options.push('All');
+ 		 	query_options.push(parseInt(wb_options.surv_max));
+ 		 default : 
+ 		 	return console.log('No Valid Selected version in wb_options.surv_ver');
+ 		}
+ 		console.log('setup manditories');
+ 	if(wb_options.tog_county =='true' || wb_options.tog_term =='true' ){//process each possible case of selected filters
+ 		console.log('Either both or one of the filters is active');
+ 		if(wb_options.tog_county == 'true' && wb_options.tog_term == 'true'){//if all filters are active
+ 			console.log(' All filters active togs are both true');
+ 			console.log('wb_options.surv_county: ' + wb_options.surv_county);
+	 		query_options.push({ surv_county: wb_options.surv_county });
+	 		console.log('wb_options.surv_term: ' + wb_options.surv_term);
+	 		query_options.push({ surv_term: wb_options.surv_term });
+	 		var wb_query = Assessment.find().where('Survey').equals(query_options[0])
+	 			.where('Status').equals('Submitted')
+	 			.where('Assessment_Term').equals(query_options[2]['surv_term']).limit(parseInt(query_options[1])); 
+	 		return wb_query;
+
+
+ 		}else{
+ 			if(wb_options.tog_county == 'true' && wb_options.tog_term =='false'){// if only the county filter is active
+ 				//CURRENTLY NOT WORKING DUE TO COUNTY FILTER ISSUE WITH FACI_ID
+	 			console.log(' County filter is true only . No term filter');
+	 			console.log('wb_options.surv_county: ' + wb_options.surv_county);
+	 			query_options.push({ surv_county: wb_options.surv_county });
+	 			var wb_query = Assessment.find().where('Survey').equals(query_options[0])
+	 			.where('Status').equals('Submitted').limit(parseInt(query_options[1])); 
+	 			console.log('Returning query with County filter and 2 manditories.');
+ 			 	return wb_query;
+	 		}else {// if only the term filter is active
+	 			console.log(' Term filter is true only . No county filter');
+	 			console.log('wb_options.surv_term: ' + wb_options.surv_term);
+	 			query_options.push({ surv_term: wb_options.surv_term });
+	 			var wb_query = Assessment.find().where('Survey').equals(query_options[0])
+	 			.where('Status').equals('Submitted')
+	 			.where('Assessment_Term').equals(query_options[2]['surv_term']).limit(parseInt(query_options[1])); 
+	 			console.log(query_options[2]['surv_term']);
+	 			console.log('Returning query with Term filter and 2 manditories.');
+ 			 	return wb_query;
+	 		}
+ 		}
+ 	}else{//only version and surv_max filters are active
+ 		console.log('no optional togs were true');
+ 		if(query_options[0] === 'All'){
+ 			var wb_query = Assessment.find().where('Status').equals('Submitted').limit(parseInt(query_options[1]));
+ 			console.log('Returning query with Max filter only');
+ 			 return wb_query;
+ 		} else{
+ 			var wb_query = Assessment.find().where('Survey').equals(query_options[0])
+	 			.where('Status').equals('Submitted').limit(parseInt(query_options[1])); 
+	 			console.log('Returning query with manditory Survey filter and Max filter');
+	 			return wb_query;
+ 		}
+ 		
+ 		
+ 	}
+};
 
  CH_RawData.prototype.findCurFaci= function(srv_fac_id, cb){
 
@@ -48,13 +126,38 @@
  console.log('this.filepath: '+ self.wb_filepath);
  console.log('this.wb: '+ typeof self.wb);
  console.log('Beginning getCHAssessments function...');
- var quer = Assessment.find().where('Survey').equals('CHV2').where('Status').equals('Submitted').limit(100);
+
+ //check for any specific filters here in the mongodb query
+ if(typeof self.wb_options !== undefined && typeof self.wb_options !== null){
+
+ 	quer = getWbQuery(self.wb_options);
+ 	if(typeof quer != undefined && typeof quer != null){
+ 		console.log('Got the required db query');
+ 	}
+ 	else{
+ 		console.log('quer from getWbQuery is empty cant continue without quer' )
+ 	}
+ 	
+ } else{
+ 	console.log('wb_options are empty');
+ 	quer =undefined;
+ 	return;
+ }
+ // quer = Assessment.find().where('Survey').equals('CHV2').where('Status').equals('Submitted').limit(100);
  console.log('/ch_excel route is about to query for assessments');
+ console.log('quer: ' + typeof quer);
+ console.log(quer);
  sync.fiber(function(){
  	var chassess1 = sync.await(quer.exec(sync.defer()));
  	console.log('chassess1 is : ' + typeof chassess1);
- 	self.getValidCHAssessments(null,chassess1,self);
- 	cb(null,self.write_dets);
+ 	if(chassess1 !== undefined && chassess1 !== null){
+ 		self.getValidCHAssessments(null,chassess1,self);
+ 		cb(null,self.write_dets);
+ 	}
+ 	else{
+ 		return console.log('Query result empty');
+ 	}
+ 	
  });
 
 
@@ -102,13 +205,14 @@
 					 			console.log('facility id: ' + srv_fac_id);
 					 			console.log('item# : ' + self.cur_surv_count);
 					 			console.log(self.getFaciDets);
-					 			var facidets2 = sync.await(self.findCurFaci(srv_fac_id, sync.defer()));
+					 			var facidets2 = sync.await(self.findCurFaci(srv_fac_id, sync.defer()));// Facility information from the faility table
 					 			console.log('facidets2 is : '+ typeof facidets2);
 					 			console.log(facidets2);
-					 			self.comp_dets = sync.await(self.getFaciDets(null,facidets2,sync.defer()));
+					 			self.comp_dets = sync.await(self.getFaciDets(null,facidets2,sync.defer())); //Get organized facility deltails in row order plus assesmnet info
 					 			console.log('self.comp_dets is : '+ typeof self.comp_dets);
 					 			self.sec_rows = sync.await(self.getRowsArray(self.cur_surv,sync.defer()));
 					 			console.log('On to the next..');
+					 			console.log(self.sec_rows);
 				 				self.wb = sync.await(self.setFacilitySummaryExcel(self.wb, self.cur_surv, self.sec_rows, self.cells, sync.defer())) ;
 				 				console.log('cur_surv_count test = '+ self.cur_surv_count);
 			 				}
@@ -116,7 +220,7 @@
 			 					console.log('self.cur-surv is undefined');
 			 					if(self.wb_ready=== true){
 			 						console.log('self.wb_ready = true');
-				 					return self.write_dets = sync.await(self.writeSec1Book(self.wb,self.wb_filepath, sync.defer()));
+				 					return self.write_dets = sync.await(self.writeSec1Book(self.wb,self.wb_filepath,self.h_path, sync.defer()));
 
 				 				}
 				 					else{
@@ -456,7 +560,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 		 
 		};
 
-	CH_RawData.prototype.writeSec1Book =  function( wb_sec1,writepath_sec1,cb ){
+	CH_RawData.prototype.writeSec1Book =  function( wb_sec1,writepath_sec1,h_path,cb ){
 			if (typeof wb_sec1 != null && typeof wb_sec1!= undefined && writepath_sec1!=undefined) {
 
 		 		console.log('Book wb_sec1 was defined , attempting to write');
@@ -474,6 +578,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 			 				console.log('File written...I think');
 			 				var write_dets={};
 			 				write_dets.write_filepath = writepath_sec1;
+			 				write_dets.h_path = h_path;
 			 				write_dets.wb = wb_sec1;
 			 				return cb(null,write_dets);
 			 				//return write_dets;

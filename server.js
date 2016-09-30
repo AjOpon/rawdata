@@ -8,6 +8,7 @@ https= require('https'), //set up server with express
  morgan=require('morgan'),
  app = express(),//define our express app
  path = require('path'),
+ bodyParser=require('body-parser'),
  mongoose=require('mongoose');
 
 /* mongoptions = config.mongoptions,
@@ -25,15 +26,15 @@ https= require('https'), //set up server with express
 //configure application to use CORS requests 
 app.use(function(req,res,next){
 	res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'GET','POST','DELETE', 'PUT');
-	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type, Authorization');
+	res.setHeader('Access-Control-Allow-Methods', 'GET','POST');
+	res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With','Content-Type');
 	next();
 });
 
+app.use(bodyParser.json()); // for parsing application/json
 //parse application/x-www-form-urlencoded parser
 app.use(bodyParser.urlencoded({extended:true}));
-// parse application/json
-app.use(bodyParser.json());
+
 
 //CONFIGURE API ROUTES
  rawdataRouter = require('./app/routes/rawdata')(app, express);
@@ -48,7 +49,7 @@ app.use(express.static(__dirname + '/public'));
 
 //one route to my index file (landing page)
 app.get('*', function(req,res){
-	res.sendFile(path.join(__dirname + '/public/home.html'));
+	res.sendFile(path.join(__dirname + '/public/app/views/home.html'));
 });
 
 //specify express port and host address

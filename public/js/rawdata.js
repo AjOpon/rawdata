@@ -5,8 +5,7 @@ $( document ).ready(function(){
   var TogCounty = false;
   var cur_surTitle = $('input[name = surv_radio]').val();
   var cur_secSelect = 'None';
-  var cur_secOpt = undefined ;
-  var curFilters = [];
+  var cur_secOpt = 'None' ;
  console.log('cur_surTitle: ');
  console.log(cur_surTitle);
  $('#SurvTitle').text(cur_surTitle);
@@ -31,58 +30,23 @@ $('#FiltTitle').text('None');
     	TogTerm = toggleTermFilt(TogTerm);
     	var filterString1 = ' ';
     	if(TogTerm){
-    		curFilters.push('Term');
-    		for (var z = 0; z < curFilters.length; z++) {
-    				filterString1 =filterString1 +',' + curFilters[z];
-    				
-    			};
-    			$('#FiltTitle').text(filterString1);
+    		
+    		$('#FiltTerm').removeClass(' hidden ');
 
     	}else{
-    		if(curFilters.length>2){
-    			for (var f = 0; f < curFilters.length; f++) {
-    				if(curFilters[f] === 'Term'){
-    					curFilters[f] = 'None';
-    					for (var w = 0; w < curFilters.length; w++) {
-		    			filterString1 =filterString1 +',' + curFilters[w];
-		    				
-		    			};
-		    			$('#FiltTitle').text(filterString);
-    				}else{
-    					continue;
-    				}
-    			};
-    		}
+    		$('#FiltTerm').addClass('hidden');
     	}
     } );
 
     $( "#ToggleCounty" ).on( "click", function(){
     	TogCounty = toggleCountyFilt(TogCounty);
 
-    	var filterString2 = ' ';
     	if(TogCounty){
-    		curFilters.push('County');
-    		for (var y = 0; y < curFilters.length; y++) {
-    				filterString =filterString +',' + curFilters[y];
-    				
-    			};
-    			$('#FiltTitle').text(filterString);
+    		
+    			$('#FiltCounty').removeClass('hidden');
 
     	}else{
-    		if(curFilters.length>2){
-    			for (var d = 0; d < curFilters.length; d++) {
-    				if(curFilters[d] === 'County'){
-    					curFilters[d] = 'None';
-    					for (var y = 0; y< curFilters.length; y++) {
-	    				filterString = filterString + ',' + curFilters[y];
-	    				
-	    			};
-    			$('#FiltTitle').text(filterString2);
-    				}else{
-    					continue;
-    				}
-    			};
-    		}
+    		$('#FiltCounty').addClass('hidden');
     	}
     } );
 
@@ -111,17 +75,6 @@ $('#FiltTitle').text('None');
     		$('#SecTitle2').text(': ');
     		$('#rawdata_form').removeClass("hidden");
     		removed_instruct = $("#instruct").detach();
-    		curFilters.push('Version');
-    		curFilters.push('Max');
-    		filterString = ' ';
-    		if(curFilters.length >1){
-    			for (var i = 0; i < curFilters.length; i++) {
-    				filterString =filterString + ' ' + curFilters[i];
-    				
-    			};
-    			$('#FiltTitle').text(filterString);
-
-    		}
     		
 			
     	}else{
@@ -139,16 +92,22 @@ $('#FiltTitle').text('None');
     	//console.log($(this).children('label').text());
     	console.log(cur_secOpt);
     	cur_secOpt = ': '+ cur_secOpt;
-    	if(cur_secOpt!= undefined){
+    	if(cur_secOpt!= undefined && cur_secOpt !== 'None'){
     		$('#SecTitle2').text(cur_secOpt);
+    		$('.filt-info').removeClass('hidden');
     	}else{
     		$('#SecTitle2').text('None');
     	}
     } );
 
+    $('#downloadit').on('click',function(){
+    	var elem = $(this);
+    	elem.toggleClass('hidden');
+    });
 
-    $( "#gen_rd" ).on( "click", function(){
-    
+    $( "#gen_rd2" ).on( "click", function(){
+    	var elem = $(this);
+    	
     	var ver_val = $('#SurVer').val();
     	var term_val = $('#SurTerm').val();
 		var county_val = $('#SurCounty').val();
@@ -159,8 +118,12 @@ $('#FiltTitle').text('None');
 		console.log(ver_val);
 		console.log('SurCounty input value is of type ' + typeof county_val);
 		console.log(county_val);
+		var curFullSectionTitle = cur_secSelect.replace(/\r?\n|\r/g, " ") + cur_secOpt.replace(/\r?\n|\r/g, " ") ; 
+		curFullSectionTitle = curFullSectionTitle.replace(/\r?\n|\r/g, " ");
 
 		rd_setup = {
+			SurTitle: cur_surTitle,
+			SurSec: curFullSectionTitle,
 			SurVer: ver_val,
 			SurTerm: term_val,
 			SurCounty: county_val,
@@ -171,6 +134,8 @@ $('#FiltTitle').text('None');
 		};
 		console.log(rd_setup);
 		var raw_data = new RawData(rd_setup);
+		console.log('Attempting to Generate RawData...');
+		GenerateRawData(raw_data);
 
     } );
 
@@ -182,7 +147,9 @@ $('#FiltTitle').text('None');
     // will not have the same click behavior as its peers
 });
 
- 
+$('#rawdata_form').submit(function(e){
+    		e.preventDefault();
+    	});
 
 function RawData(setup){
 	if(typeof setup !== undefined && typeof setup !== null ){
@@ -190,21 +157,21 @@ function RawData(setup){
 			console.log('Setup has the SurVer && SurMax');
 			this.surv_ver = setup.SurVer;
 			this.surv_max = setup.SurMax;
-
 			if(setup.TogTerm){
 				console.log('Term filter was selected');
 				this.surv_term = setup.SurTerm;
-
+				this.tog_term = setup.TogTerm;//boolean term toggle value	
 				if(setup.TogCounty){
 
 					console.log('County filter was selected');
 					this.surv_county = setup.SurCounty;
+					this.tog_county = setup.TogCounty;//boolean county toggle value
 					console.log(this);
 					//this.GenerateRawData();
 
 				} else{
 					console.log('No County filter was selected');
-					this.surv_county = 'all';
+					this.surv_county = 'All';
 					this.tog_county = setup.TogCounty;//boolean county toggle value
 					console.log(this);
 					//this.GenerateRawData();
@@ -213,19 +180,21 @@ function RawData(setup){
 			}else{
 
 				console.log('No Term filter was selected');
-				this.surv_term = 'all';
+				this.surv_term = 'All';
 				this.tog_term = setup.TogTerm;//boolean term toggle value
+
 
 				if(setup.TogCounty){
 
 					console.log('County filter was selected');
 					this.surv_county = setup.SurCounty;
+					this.tog_county = setup.TogCounty;//boolean county toggle value
 					console.log(this);
 					//this.GenerateRawData();
 
 				} else{
 					console.log('No County filter was selected');
-					this.surv_county = 'all';
+					this.surv_county = 'All';
 					this.tog_county = setup.TogCounty;//boolean county toggle value
 					console.log(this);
 					//this.GenerateRawData();
@@ -251,8 +220,41 @@ function RawData(setup){
 
 };
 
-RawData.prototype.GenerateRawData = function(){
- return;
+GenerateRawData = function(obj){
+
+ $.ajax({ url:'http://127.0.0.1:3005/rawdata/ch_excel',
+ 	type: 'POST',
+ 	data: obj,
+ 	dataType: 'json',
+ 	success:function(data){
+ 		console.log(' Success');
+ 		console.log(data);
+ 		console('success : ');
+ 		console.log(data);
+ 		if(data){
+ 			if(data.success == true){
+ 				console.log(data.h_path);
+ 				console.log(window.location.host);
+
+ 				cur_wblink ='http://' +window.location.host + '/ch_download/' + data.h_path;
+ 				alert('File was successfully generated!');
+ 				$('dl_btn').removeClass('hidden');
+ 				$('#downloadit').removeClass('hidden');
+ 				$('#downloadit').attr('href', cur_wblink);
+ 			}
+ 		}
+ 	},
+
+ 	error:function(err){
+ 		console.log(' Fail');
+ 		console.log(err);
+ 		console.log('err: ' );
+ 		console.log(err);
+ 	} 
+
+
+
+ 	});
 };
 var toggleVerFilt = function(Ver) {
     	
