@@ -137,6 +137,16 @@ $('#FiltTitle').text('None');
 		console.log('Attempting to Generate RawData...');
 		GenerateRawData(raw_data);
 
+		$('#dialog-message').removeClass('hidden');
+		$( function() {
+				    $( "#dialog-message" ).dialog({
+				      modal: true,
+				      hide: { effect: "explode", duration: 1000 }
+				    });
+				  } );
+
+ 				
+
     } );
 
 
@@ -229,18 +239,32 @@ GenerateRawData = function(obj){
  	success:function(data){
  		console.log(' Success');
  		console.log(data);
- 		console('success : ');
- 		console.log(data);
  		if(data){
  			if(data.success == true){
- 				console.log(data.h_path);
+ 				console.log(data.wb_name);
  				console.log(window.location.host);
 
- 				cur_wblink ='http://' +window.location.host + '/ch_download/' + data.h_path;
- 				alert('File was successfully generated!');
- 				$('dl_btn').removeClass('hidden');
- 				$('#downloadit').removeClass('hidden');
+ 				cur_wblink ='http://' +window.location.host + '/rawdata/ch_download/' + data.wb_name;
+ 				$('#dl_btn').removeClass('hidden');
+ 				$( "#gen_rd2" ).addClass('hidden');
+ 				$( "#dialog-message" ).prop('title','Downloaded');
  				$('#downloadit').attr('href', cur_wblink);
+ 				$('#d-message').html('File was successfully generated! Click the download button below');
+ 				$( function() {
+				    $( "#dialog-message" ).dialog({
+				      modal: true,
+				      buttons: {
+				        Ok: function() {
+				          $( this ).dialog( "close" );
+				          $( "#gen_rd2" ).toggleClass('hidden');
+				        }
+				      }
+				    });
+				  } );
+
+ 				
+ 				
+
  			}
  		}
  	},

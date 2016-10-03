@@ -28,3 +28,8 @@
 #FiltCounty, #FiltVer, #FiltMax, #FiltTerm {
 	color: #29ab29;
 }
+
+#downloadit {
+	color: #fff;
+	text-decoration: none;
+}

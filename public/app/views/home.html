@@ -5,6 +5,7 @@
 		<title>Raw Data</title>
 		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css">
 		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap-theme.css">
+		<link rel="stylesheet" href="/bower_components/jquery-ui/themes/base/jquery-ui.css">
 		<link rel="stylesheet" href="/css/style.css">
 		<script src= "/bower_components/jquery/dist/jquery.js"></script>
 		<script src= "/bower_components/jquery-ui/jquery-ui.js"></script>
@@ -158,7 +159,7 @@
 								  </select>
 							  
 						</div>
-					<div class="form-group">
+					<!-- <div class="form-group">
 							<div class="checkbox">
 							    <label><input type="checkbox" id="ToggleCounty"> Add County Filter</label>
 							  </div>
@@ -167,7 +168,7 @@
 								    <option>All</option>
 								  </select>
 							  
-						</div>
+						</div> -->
 					<div class="form-group">
 							<label for="SurCount">Max Number Of Surveys</label>
 								  <select class="form-control" id="SurMax">
@@ -179,12 +180,19 @@
 							  
 						</div>
 					  <button id="gen_rd2" type="button" class="btn btn-default">Generate Raw Data File</button>
-					  <button id="dl_btn" class="btn btn-success">
-						<a id= 'downloadit' href="" class="hidden">
-					Download
-					</a>
-					</button>
+					  
 				</form>
+				<div id="dialog-message" title="Download" class="hidden">
+					  <p id="d-message">
+					    <span class="" style="float:left; margin:0 7px 50px 0;"></span>
+					    Generating requested excel...
+					  </p>
+					  <button id="dl_btn" class="btn btn-success hidden" >
+							<a id= 'downloadit' href="" target="_bla">
+							Download Excel
+							</a>
+					</button>
+					</div>
 			</div>
 		</div>
 			<!-- <button >

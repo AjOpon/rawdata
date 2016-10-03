@@ -10,11 +10,11 @@ var fs = require('fs');
 
 
  //req objects to be set by client side controller
- rfilename = 'sec1_temp2.xlsx';
+ rfilename = 'sec1_temp200.xlsx';
  readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
  wfilename= 'SEC1_StaffTraining.xlsx';
  
- half_filepath = "/uploads/" ; 
+ half_filepath = "/uploads/" + wfilename ; 
  write_filepath= path.join(__dirname+ half_filepath) ;
 
 
@@ -38,7 +38,7 @@ rawdataRouter.route('/ch_excel')
 var raw_file_options  = req.body;
 var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
 	filepath_wb: write_filepath,
-	h_path : wfilename,
+	wb_name : wfilename,
 	workbk: workbook,
 	wb_options: raw_file_options
 
@@ -54,15 +54,15 @@ var ch_rawdata = new RawData(setup);
 sync.fiber(function(){
 	write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
 	console.log('write_dets1 is : '+ typeof write_dets1);
-	console.log(req.get('Content-Type'));
+	
 	
 	if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
 		console.log(write_dets1.write_filepath);
 		console.log('Found xlsx file for download');
 		//res.download(write_dets1.write_filepath);
-		res.send({ write_path :write_dets1.h_path ,
+		res.send({ 
 			success : true,
-			wbname: h_path
+			wb_name: write_dets1.wb_name
 
 		});
 
@@ -119,10 +119,14 @@ else{
 rawdataRouter.route('/ch_download/:filename')
 	.get(function(req,res){
 		if(typeof req.params != undefined && typeof req.params != null){
+			console.log('req.params...');
+			console.log(req.params.filename);
 		  var curfilename =  req.params.filename;
-		  curwrite_filepath= path.join(__dirname+ half_filepath + curfilename) ;
+		  half_filepath  = '/uploads/' +curfilename;
+		  curwrite_filepath= path.join(__dirname+ half_filepath ) ;
 		  console.log('Sending file for download');
 		  sync.fiber(function(){
+
 		 				var excel_wrt_stats = sync.await(fs.stat(curwrite_filepath, sync.defer()));
 			 			console.log('excel_wrt_stats: '+ typeof excel_wrt_stats );
 			 			console.log(excel_wrt_stats);

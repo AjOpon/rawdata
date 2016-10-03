@@ -12,7 +12,7 @@
  function CH_RawData(setupInfo){
   this.cells= setupInfo.cells;
   this.wb_filepath = setupInfo.filepath_wb;
-  this.h_path = setupInfo.h_path;
+  this.wb_name = setupInfo.wb_name;
   this.wb = setupInfo.workbk;
   this.wb_options = setupInfo.wb_options;
   this.cur_surv = undefined;
@@ -220,7 +220,7 @@ function getWbQuery(options){
 			 					console.log('self.cur-surv is undefined');
 			 					if(self.wb_ready=== true){
 			 						console.log('self.wb_ready = true');
-				 					return self.write_dets = sync.await(self.writeSec1Book(self.wb,self.wb_filepath,self.h_path, sync.defer()));
+				 					return self.write_dets = sync.await(self.writeSec1Book(self.wb,self.wb_filepath,self.wb_name, sync.defer()));
 
 				 				}
 				 					else{
@@ -369,8 +369,8 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 							self.cur_faciDets.Tier, 
 							self.cur_faciDets.Type,
 							self.cur_faciDets.Owner];// store all ecessary facility information for current facility
-							assessArr = self.assess_dets;
-							comp_dets= faciliArr.concat(assessArr);
+							var assessArr = self.assess_dets;
+							var comp_dets= faciliArr.concat(assessArr);
 							console.log('comp_dets: ');
 							console.log(comp_dets);
 							cb(null, comp_dets);
@@ -383,7 +383,28 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 							}
 			}
 			else{
-				return console.log('We dont got nada');
+				 console.log('We dont got nada');
+				 console.log('Facility wasnt found, setting default facility data' );
+				 var faciliArr = ['Not Found','Not Found',
+							'Not Found','Not Found',
+							'Not Found', 
+							'Not Found',
+							'Not Found'];
+				self.assess_dets  = self.getfaciAssessDets(self.cur_surv);
+				console.log('self.assess_dets: ');
+				console.log(self.assess_dets);
+
+				if(typeof self.assess_dets != null && typeof self.assess_dets != undefined && Array.isArray(self.assess_dets)){
+					var assessArr = self.assess_dets;
+					var comp_dets= faciliArr.concat(assessArr);
+							console.log('comp_dets: ');
+							console.log(comp_dets);
+							cb(null, comp_dets);
+				} else {
+					console.log('assess_dets is not valid check type');
+					return;
+				}
+				
 			}
 			
 		}
@@ -560,11 +581,15 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 		 
 		};
 
-	CH_RawData.prototype.writeSec1Book =  function( wb_sec1,writepath_sec1,h_path,cb ){
+	CH_RawData.prototype.writeSec1Book =  function( wb_sec1,writepath_sec1,wb_name,cb ){
 			if (typeof wb_sec1 != null && typeof wb_sec1!= undefined && writepath_sec1!=undefined) {
 
+			
+				
 		 		console.log('Book wb_sec1 was defined , attempting to write');
 		 		bk1=XLSX.writeFile(wb_sec1, writepath_sec1);
+
+
 		 		if(typeof blk1 != undefined && typeof blk1 != null ){
 		 			//fs.writeFileSync( bk1); 
 		 			console.log('should be in the folder ' + writepath_sec1);
@@ -578,7 +603,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 			 				console.log('File written...I think');
 			 				var write_dets={};
 			 				write_dets.write_filepath = writepath_sec1;
-			 				write_dets.h_path = h_path;
+			 				write_dets.wb_name = wb_name;
 			 				write_dets.wb = wb_sec1;
 			 				return cb(null,write_dets);
 			 				//return write_dets;
@@ -590,12 +615,13 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 		 			});
 		 			
 		 		}
-		 		else
+		 		
+		 	else
 		 		{	
 		 			var write_dets = undefined;
-		 			return console.log('blk1 was undefined/null ');
+		 			return
+		 			 console.log('blk1 was undefined/null ');
 		 		}
-		 		
 		 		
 
 		 	}else{
