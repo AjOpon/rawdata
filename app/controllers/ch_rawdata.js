@@ -386,7 +386,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 				 console.log('We dont got nada');
 				 console.log('Facility wasnt found, setting default facility data' );
 				 var faciliArr = ['Not Found','Not Found',
-							'Not Found','Not Found',
+							self.cur_surv.Facility_ID,'Not Found',
 							'Not Found', 
 							'Not Found',
 							'Not Found'];
@@ -640,8 +640,21 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 			var spos  =assessType.length - 2;
 			var lpos= assessType.length + 1;
 			var version = assessType.substring(spos,lpos);
+			var assessDate = new Date(ch_surv_det.Date);
+			var dd = assessDate.getDate();
+			var mm = assessDate.getMonth()+1; //January is 0!
+
+			var yyyy = assessDate.getFullYear();
+			if(dd<10){
+			    dd='0'+dd
+			} 
+			if(mm<10){
+			    mm='0'+mm
+			} 
+			var assessDateString = dd+'/'+mm+'/'+yyyy;
+
 			var term = ch_surv_det.Assessment_Term;
-			var arr_assess_dets = [assessType,version, term];
+			var arr_assess_dets = [assessDateString,assessType,version, term];//['dd-mm-yy','CHV2','Baseline' ]
 			return arr_assess_dets;
 		 	} 
 		 	else{

@@ -94,16 +94,13 @@ $('#FiltTitle').text('None');
     	cur_secOpt = ': '+ cur_secOpt;
     	if(cur_secOpt!= undefined && cur_secOpt !== 'None'){
     		$('#SecTitle2').text(cur_secOpt);
+    		$('#gen_rd2').removeClass('hidden');
     		$('.filt-info').removeClass('hidden');
     	}else{
     		$('#SecTitle2').text('None');
     	}
     } );
 
-    $('#downloadit').on('click',function(){
-    	var elem = $(this);
-    	elem.toggleClass('hidden');
-    });
 
     $( "#gen_rd2" ).on( "click", function(){
     	var elem = $(this);
@@ -141,7 +138,7 @@ $('#FiltTitle').text('None');
 		$( function() {
 				    $( "#dialog-message" ).dialog({
 				      modal: true,
-				      hide: { effect: "explode", duration: 1000 }
+				      hide: { effect: "clip", duration: 500 }
 				    });
 				  } );
 
@@ -243,7 +240,6 @@ GenerateRawData = function(obj){
  			if(data.success == true){
  				console.log(data.wb_name);
  				console.log(window.location.host);
-
  				cur_wblink ='http://' +window.location.host + '/rawdata/ch_download/' + data.wb_name;
  				$('#dl_btn').removeClass('hidden');
  				$( "#gen_rd2" ).addClass('hidden');
@@ -256,7 +252,11 @@ GenerateRawData = function(obj){
 				      buttons: {
 				        Ok: function() {
 				          $( this ).dialog( "close" );
-				          $( "#gen_rd2" ).toggleClass('hidden');
+				          $('#downloadit').attr('href', '#');
+				          $('#dl_btn').addClass('hidden');
+				          $(this).addClass('hidden');
+				          $('#d-message').html('Generating requested excel...');
+				          $( "#gen_rd2" ).removeClass('hidden');
 				        }
 				      }
 				    });
@@ -266,13 +266,27 @@ GenerateRawData = function(obj){
  				
 
  			}
+ 			else if(data.success == false){
+ 				$('#d-message').html('Was unable to generate file. No surveys may have been found <br> .Please select other options and try again');
+ 				$( function() {
+				    $( "#dialog-message" ).dialog({
+				      modal: true,
+				      buttons: {
+				        Ok: function() {
+				          $( this ).dialog( "close" );
+				          $('#downloadit').attr('href', '#');
+				          $(this).addClass('hidden');
+				          $('#d-message').html('Generating requested excel...');
+				        }
+				      }
+				    });
+				  } );
+ 			}
  		}
  	},
 
  	error:function(err){
  		console.log(' Fail');
- 		console.log(err);
- 		console.log('err: ' );
  		console.log(err);
  	} 
 

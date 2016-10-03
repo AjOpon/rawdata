@@ -10,19 +10,16 @@ var fs = require('fs');
 
 
  //req objects to be set by client side controller
- rfilename = 'sec1_temp200.xlsx';
+ /*rfilename = 'sec1_temp200.xlsx';
  readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
- wfilename= 'SEC1_StaffTraining.xlsx';
+ wfilename= 'SEC1_StaffTraining.xlsx';*/
  
- half_filepath = "/uploads/" + wfilename ; 
+ half_filepath = "/uploads/"
  write_filepath= path.join(__dirname+ half_filepath) ;
 
 
- console.log('Executing excel read route');
- console.log('file location : '+ readfile);
- var workbook = XLSX.readFile(readfile);
- console.log('reading from ' + rfilename);
- console.log('workbook is : '+ typeof workbook);
+ console.log('Rawdata router ready');
+ 
  
 
 
@@ -33,47 +30,106 @@ module.exports=function(app,express){
 rawdataRouter.route('/ch_excel')
  .post(function(req,res){
  	//setup from the req object to decide what rawdata to present e.g Survey Version, Term, County, Num of Surveys 
-
-
 var raw_file_options  = req.body;
-var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
-	filepath_wb: write_filepath,
-	wb_name : wfilename,
-	workbk: workbook,
-	wb_options: raw_file_options
-
-};
-
-console.log('setup.workbk is: '+ typeof setup.workbk);
 console.log('Showing the request body');
-console.log(req.body); // raw_data obj from client
-var ch_rawdata = new RawData(setup);
+console.log(raw_file_options); // raw_data obj from client
+if(typeof raw_file_options != undefined && typeof raw_file_options != null)
+{
+	var maxSurv = parseInt(raw_file_options.surv_max);
+
+		switch (maxSurv){
+
+			case 100:
+				rfilename = 'sec1_temp100.xlsx';
+				break;
+			case 200: 
+				rfilename = 'sec1_temp200.xlsx';
+				break;
+			case 500: 
+				rfilename = 'sec1_temp500.xlsx';
+				break;
+			case 1000:
+				rfilename = 'sec1_temp1000.xlsx';
+				break;
+			default :
+				rfilename = 'sec1_temp100.xlsx';
+				break;
+
+		}
+		 //req objects to be set by client side controller
+		 readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
+		 filterstring = raw_file_options.surv_max + raw_file_options.surv_ver;
+		 if(raw_file_options.tog_term == 'true' || raw_file_options.tog_county== 'true'){
+		 	if(raw_file_options.tog_term == 'true' && raw_file_options.tog_county == 'false'){
+
+		 		filterstring += raw_file_options.surv_term;
+		 		console.log('filterstring : '+ filterstring);
+
+		 	} else if(raw_file_options.tog_term == 'false' && raw_file_options.tog_county == 'true')
+		 	{
+		 		filterstring += raw_file_options.surv_county;
+
+		 	} else{
+
+		 		filterstring = raw_file_options.surv_term + raw_file_options.surv_county;
+		 	}
+		 }
+
+		 wfilename= filterstring + '.xlsx';// SurvVer+ SurvMax+ [SurvTerm, SurvCounty] + '.xlsx'
+
+		console.log('filterstring : '+ filterstring);
+
+		 
+
+		half_filepath = "/uploads/" + wfilename ; 
+		console.log('file location : '+ readfile);
+		 var workbook = XLSX.readFile(readfile);
+		 console.log('reading from ' + rfilename);
+		 console.log('workbook is : '+ typeof workbook);
+		 write_filepath= path.join(__dirname + half_filepath) ;
+
+
+		var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
+			filepath_wb: write_filepath,
+			wb_name : wfilename,
+			workbk: workbook,
+			wb_options: raw_file_options
+
+		};
+
+		console.log('setup.workbk is: '+ typeof setup.workbk);
+
+		var ch_rawdata = new RawData(setup);
 
 
 
-sync.fiber(function(){
-	write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
-	console.log('write_dets1 is : '+ typeof write_dets1);
-	
-	
-	if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
-		console.log(write_dets1.write_filepath);
-		console.log('Found xlsx file for download');
-		//res.download(write_dets1.write_filepath);
-		res.send({ 
-			success : true,
-			wb_name: write_dets1.wb_name
+		sync.fiber(function(){
+			write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
+			console.log('write_dets1 is : '+ typeof write_dets1);
+			
+			
+			if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
+				console.log(write_dets1.write_filepath);
+				console.log('Found xlsx file for download');
+				//res.download(write_dets1.write_filepath);
+				res.send({ 
+					success : true,
+					wb_name: write_dets1.wb_name
 
+				});
+
+			}else{
+				console.log('Undefined writedets , issues within');
+				res.send({
+					success: false ,
+					message: 'something went wrong'
+				});
+			}
 		});
-
-	}else{
-		console.log('Undefined writedets , issues within');
-		res.send({
-			success: false ,
-			message: 'something went wrong'
-		});
+	} else{
+		console.log('appears the req.body is empty');
 	}
-});
+
 
 
 //chassessments = chdata;
