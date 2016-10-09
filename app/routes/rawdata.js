@@ -75,7 +75,7 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 		 	}
 		 }
 
-		 wfilename= filterstring + '.xlsx';// SurvVer+ SurvMax+ [SurvTerm, SurvCounty] + '.xlsx'
+		 wfilename= filterstring + '.xlsx';// SurvVer+ SurvMax+ [..SurvTerm, ..SurvCounty] + '.xlsx'
 
 		console.log('filterstring : '+ filterstring);
 
