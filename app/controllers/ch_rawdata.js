@@ -7,7 +7,8 @@
  var sync = require('synchronize'); //To run the code synchronously
  var Assessment = require('../models/assessment');//Get the DB model for Assessments
  var Facility = require('../models/facility');//Get the DB model for facilities
- const ver1 = 'CHV1', ver2 = 'CHV2';//setup the survey versionsas  constants.
+ const ver1 = 'CHV1', ver2 = 'CHV2', 
+ 	StaffTrainingRowPat = 'CHV2SEC1BLK1RW';//setup the survey versionsas  constants.
 
  function CH_RawData(setupInfo){ // initialize the CH_RAwData object 
   this.cells= setupInfo.cells; //cells for start postions on workbook
@@ -207,10 +208,39 @@ function getWbQuery(options){// client specified options
 					 			console.log(facidets2);
 					 			self.comp_dets = sync.await(self.getFaciDets(null,facidets2,sync.defer())); //Get organized facility deltails in row order plus assesmnet info
 					 			console.log('self.comp_dets is : '+ typeof self.comp_dets);
-					 			self.sec_rows = sync.await(self.getRowsArray(self.cur_surv,sync.defer()));//Get neatly arranged section rows with orderly columns
-					 			console.log('On to the next..');
-					 			console.log(self.sec_rows);
-				 				self.wb = sync.await(self.setFacilitySummaryExcel(self.wb, self.cur_surv, self.sec_rows, self.cells, sync.defer())) ;//add current survey to workbook object
+					 			/*
+									switch case for the sec_row pattern to apply (sane switch case for the section option.)
+					 			*/
+					 			switch(self.wb_options.surv_secTitle){
+										case 'StaffTraining':
+										//setExcel for StaffTraining
+										console.log('Prepping the excel for StaffTraining');
+										self.sec_rows = sync.await(self.getRowsArray(self.cur_surv,StaffTrainingRowPat,sync.defer()));//Get neatly arranged section rows with orderly columns
+					 					console.log('On to the next..');
+							 			console.log(self.sec_rows);
+						 				self.wb = sync.await(self.setStaffTrainingExcel(self.wb, self.cur_surv, self.sec_rows, self.cells, sync.defer())) ;//add current survey to workbook object
+										
+										break;
+										case 'HealthServices':
+										//setExcel for HealthServices
+										return;
+										break;
+										default:
+										console.log('Unable to determinethe survey section name');
+										return;
+									}
+					 			
+				 				/* 
+									here we will have a switch for each possible section option e.g
+									setStaffTraining
+									setHealthServices
+									etc
+
+									switch(wb_options.surv_secTitle){
+		
+									}
+									
+				 				*/
 				 				console.log('cur_surv_count test = '+ self.cur_surv_count);
 			 				}
 			 				else if(self.cur_surv_count == self.total_survs) {//if the last survey in the array has been removed
@@ -285,7 +315,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 			
 		};
 
-	CH_RawData.prototype.getRowsArray =  function(assess,cb ){
+	CH_RawData.prototype.getRowsArray =  function(assess,pattern,cb ){
 		/*
 		Funtion to return array of organized columns of each row in section DataKeys
 		*/
@@ -298,7 +328,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 				if(typeof self.wb != undefined && typeof self.wb != null){
 					var ch_survey = self.cur_surv;//the current survey to be written information for.
 					var surv_keys = Object.keys(ch_survey.Data); // array of all the keys for the survey.Data object used to make sec_keys
-					var sec_keys = self.getSecDataKeys(surv_keys,'CHV2SEC1BLK1RW');// Section datakeys according to rows. used to make rowArrays
+					var sec_keys = self.getSecDataKeys(surv_keys,pattern);// Section datakeys according to rows. used to make rowArrays
 					console.log('sec_keys'); 
 					console.log(sec_keys);
 					var sec_rows = self.makeRowsArray(sec_keys);//get array of rows in order with each col.
@@ -401,7 +431,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 
 	CH_RawData.prototype.getSingleRowArray = function(secRowsCols1,row_pattern){
 		/*
-		function to return a single organized array of columns representing a rorw of Data
+			function to return a single organized array of columns representing a rorw of Data
 		*/
 		var re = new RegExp(row_pattern, 'i');
 		var cur_row = [];
@@ -424,13 +454,13 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 		}
 	} ;
 
-	CH_RawData.prototype.setFacilitySummaryExcel =  function(wbk,ch_surv,s_datakeys,srt_stp, cb){
+	CH_RawData.prototype.setStaffTrainingExcel =  function(wbk,ch_surv,s_datakeys,srt_stp, cb){
 
 		/*
 		Large function to generate the workbook object with survey data in place
 		*/
 		self = this;
-	console.log('Launching setFacilitySummaryExcel');
+	console.log('Launching setStaffTrainingExcel');
 		// Get worksheet 
 			if(typeof ch_surv == 'object' && typeof ch_surv != null && typeof wbk != undefined && typeof wbk != null && typeof s_datakeys != null && typeof s_datakeys != undefined)
 			{	

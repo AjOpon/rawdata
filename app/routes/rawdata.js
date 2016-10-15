@@ -3,7 +3,7 @@
  var Assessment = require('../models/assessment'),
  path = require('path'),
  XLSX = require('XLSX'),
- RawData = require('../controllers/ch_rawdata');
+ CHRawData = require('../controllers/ch_rawdata');
 var fs = require('fs');
  var sync = require('synchronize');
 
@@ -75,7 +75,7 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 		 	}
 		 }
 
-		 wfilename= filterstring + '.xlsx';// SurvVer+ SurvMax+ [..SurvTerm, ..SurvCounty] + '.xlsx'
+		 wfilename= raw_file_options.gen_name+ filterstring + '.xlsx';// SurvVer+ SurvMax+ [..SurvTerm, ..SurvCounty] + '.xlsx'
 
 		console.log('filterstring : '+ filterstring);
 
@@ -83,49 +83,76 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 
 		half_filepath = "/uploads/" + wfilename ; 
 		console.log('file location : '+ readfile);
-		 var workbook = XLSX.readFile(readfile);
+		 var workbook = XLSX.readFile(readfile); //replace with encoding cells for the XLSX file , using a workbook object instead
+		 /*
+		 	Setup workbook object.
+		 	Range, sheetnames etc.
+		 */
 		 console.log('reading from ' + rfilename);
 		 console.log('workbook is : '+ typeof workbook);
 		 write_filepath= path.join(__dirname + half_filepath) ;
 
+	switch(raw_file_options.surv_Title){//determine type of survey being requested e.g CH
 
-		var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},
-			filepath_wb: write_filepath,
-			wb_name : wfilename,
-			workbk: workbook,
-			wb_options: raw_file_options
+		case 'CH':
 
-		};
+			//logic for ch assessments
+			console.log('user requested for a CH rawdata file');
+					var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},//depending on switch case
+					filepath_wb: write_filepath,
+					wb_name : wfilename,
+					workbk: workbook,
+					wb_options: raw_file_options
 
-		console.log('setup.workbk is: '+ typeof setup.workbk);
+				};
 
-		var ch_rawdata = new RawData(setup);
+				console.log('setup.workbk is: '+ typeof setup.workbk);
+
+				var ch_rawdata = new CHRawData(setup);//change logic to depend on switch case
 
 
 
-		sync.fiber(function(){
-			write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
-			console.log('write_dets1 is : '+ typeof write_dets1);
-			
-			
-			if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
-				console.log(write_dets1.write_filepath);
-				console.log('Found xlsx file for download');
-				//res.download(write_dets1.write_filepath);
-				res.send({ 
-					success : true,
-					wb_name: write_dets1.wb_name
+				sync.fiber(function(){
+					write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
+					console.log('write_dets1 is : '+ typeof write_dets1);
+					
+					
+					if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
+						console.log(write_dets1.write_filepath);
+						console.log('Found xlsx file for download');
+						//res.download(write_dets1.write_filepath);
+						res.send({ 
+							success : true,
+							wb_name: write_dets1.wb_name
 
+						});
+
+					}else{
+						console.log('Undefined writedets , issues within');
+						res.send({
+							success: false ,
+							message: 'something went wrong'
+						});
+					}
 				});
 
-			}else{
-				console.log('Undefined writedets , issues within');
-				res.send({
-					success: false ,
-					message: 'something went wrong'
-				});
-			}
-		});
+			break;
+		case 'MNH':
+			//mnh assessment file logic
+			console.log('MNH rawdata file requested by user');
+			break;
+		case 'IMCI':
+			//imci assessment file logic
+			console.log('MNH rawdata file requested by user');
+			break;
+		default:
+		console.log('No valid selection of survey title');
+		return;
+
+	}//end switch statement 
+
+
+		
 	} else{
 		console.log('appears the req.body is empty');
 	}

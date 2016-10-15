@@ -66,7 +66,7 @@ $('#FiltTitle').text('None');
     	var elem = $ (this);
     	console.log('elem.html() : ');
     	console.log(elem.html());
-    	cur_secSelect =elem.text();
+    	cur_secSelect =elem.attr('sec-val');//change to the value of sec-val attr
 
 
     	if(cur_secSelect!= 'None' && cur_secSelect != undefined){
@@ -87,13 +87,13 @@ $('#FiltTitle').text('None');
     	var elem = $ (this);
     	console.log('elem.html() : ');
     	console.log(elem.html());
-    	cur_secOpt =$(this).text();
+    	cur_secOpt =$(this).attr('sec-opt-val');//change to the value of sec-opt-val attr
     	console.log("cur_secOpt: ");
     	//console.log($(this).children('label').text());
     	console.log(cur_secOpt);
-    	cur_secOpt = ': '+ cur_secOpt;
+    	var cur_secOptText = ': '+ cur_secOpt;
     	if(cur_secOpt!= undefined && cur_secOpt !== 'None'){
-    		$('#SecTitle2').text(cur_secOpt);
+    		$('#SecTitle2').text(cur_secOptText);
     		$('#gen_rd2').removeClass('hidden');
     		$('.filt-info').removeClass('hidden');
     	}else{
@@ -115,12 +115,12 @@ $('#FiltTitle').text('None');
 		console.log(ver_val);
 		console.log('SurCounty input value is of type ' + typeof county_val);
 		console.log(county_val);
-		var curFullSectionTitle = cur_secSelect.replace(/\r?\n|\r/g, " ") + cur_secOpt.replace(/\r?\n|\r/g, " ") ; 
-		curFullSectionTitle = curFullSectionTitle.replace(/\r?\n|\r/g, " ");
+		var curFullSectionTitle = cur_secSelect + cur_secOpt; 
 
 		rd_setup = {
 			SurTitle: cur_surTitle,
-			SurSec: curFullSectionTitle,
+			SurSec: cur_secSelect,
+			SurSecTitle: cur_secOpt,
 			SurVer: ver_val,
 			SurTerm: term_val,
 			SurCounty: county_val,
@@ -160,6 +160,11 @@ $('#rawdata_form').submit(function(e){
 
 function RawData(setup){
 	if(typeof setup !== undefined && typeof setup !== null ){
+		this.surv_Title = setup.SurTitle;//e.g CH
+		this.surv_Sec= setup.SurSec;//e.g SECTION1
+		this.surv_secTitle= setup.SurSecTitle;//e.g StaffTraining
+		this.gen_name = this.surv_Title + this.surv_Sec + this.surv_secTitle ;
+
 		if(typeof setup.SurVer !== undefined && typeof setup.SurVer !== null && typeof setup.SurMax !== undefined && typeof setup.SurMax !== null){
 			console.log('Setup has the SurVer && SurMax');
 			this.surv_ver = setup.SurVer;
