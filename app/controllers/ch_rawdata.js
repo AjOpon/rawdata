@@ -14,7 +14,7 @@
   this.cells= setupInfo.cells; //cells for start postions on workbook
   this.wb_filepath = setupInfo.filepath_wb;// file path for workbook backend
   this.wb_name = setupInfo.wb_name;//name of wb depending on client side selections 
-  this.wb = setupInfo.workbk;//workbook used as template for writing new XLSX 
+  this.wb = setupInfo.workbk;//workbook object used as template for writing new XLSX 
   this.wb_options = setupInfo.wb_options;// workbook options for query searching
   this.cur_surv = undefined;// current assessment/survey in the data writing loop
   this.cur_faciDets  = undefined;//current details of the facility for the survey
@@ -135,6 +135,7 @@ function getWbQuery(options){// client specified options
  	quer = getWbQuery(self.wb_options);
  	if(typeof quer != undefined && typeof quer != null){ //make sure the query isnt empty
  		console.log('Got the required db query');
+ 		
  	}
  	else{
  		console.log('quer from getWbQuery is empty cant continue without quer' );
@@ -469,7 +470,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 				var work_buch = {};
 				var first_sheet = wbk.SheetNames[0];//get the name of the first sheet in the wb being read by XLSX
 				 console.log('name of first sheet is : ' + first_sheet);
-				 var worksheet = wbk.Sheets[first_sheet];//get the first sheet
+				 var worksheet = wbk.Sheets[first_sheet];//get the first sheet e.g CH
 
 				if(Array.isArray(s_datakeys) &&  typeof faciDets != undefined && typeof faciDets != undefined ){
 
@@ -477,7 +478,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 					srv_srt = srt_stp.srv_srt, srv_end = srt_stp.srv_end;//cell start and end point for the facility data in the wb
 					console.log('col_srt = '+ col_srt + ' col_end = '+ col_end);
 					console.log('srv_srt = '+ srv_srt + ' srv_end = '+ srv_end)
-					var de_col_srt = XLSX.utils.decode_cell(col_srt);//decode the start into an object of its row and col value
+					var de_col_srt = XLSX.utils.decode_cell(col_srt);//decode the start into an object of its row and col value {c: , r :  }
 					var de_col_end = XLSX.utils.decode_cell(col_end);
 					var de_srv_srt = XLSX.utils.decode_cell(srv_srt);
 					var de_srv_end = XLSX.utils.decode_cell(srv_end);
@@ -491,7 +492,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 					console.log(de_srv_end);
 
 					var cur_col= de_col_srt.c,//set cur_col to the start etc
-						cur_col_srv =de_srv_srt.c,
+						cur_col_srv =de_srv_srt.c,//set cur_col for the facility section of the wb
 						col_dataky = 2,
 						last_col = de_col_end.c,
 						last_col_srv = de_srv_end.c,
@@ -526,7 +527,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 								if (safe_val != undefined ) {
 										console.log('datakey_rc : '+ datakey_rc);
 										console.log('safe_val : ' + safe_val);
-										worksheet[en_cell_add] = {v:safe_val, t:'n'};
+										worksheet[en_cell_add] = { v:safe_val, t:'n'};
 								}else{
 									console.log('safe_val at datakey_rc: '+ datakey_rc + 'was undefined');
 									console.log('val_datakey_rc : ' + val_datakey_rc);

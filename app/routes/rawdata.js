@@ -4,6 +4,7 @@
  path = require('path'),
  XLSX = require('XLSX'),
  CHRawData = require('../controllers/ch_rawdata');
+ wb_custom = require('../controllers/workbook_custom');
 var fs = require('fs');
  var sync = require('synchronize');
 
@@ -83,12 +84,16 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 
 		half_filepath = "/uploads/" + wfilename ; 
 		console.log('file location : '+ readfile);
-		 var workbook = XLSX.readFile(readfile); //replace with encoding cells for the XLSX file , using a workbook object instead
+		  var wb_new = new wb_custom(); //empty workbook object
+		  wb_new = wb_new.setNewWorkBook('CH', 'SECTION1','StaffTraining');
+		 var workbook = wb_new; //replace with encoding cells for the XLSX file , using a workbook object instead
 		 /*
 		 	Setup workbook object.
 		 	Range, sheetnames etc.
+
+		 	check workbook_custom
 		 */
-		 console.log('reading from ' + rfilename);
+		 //console.log('reading from ' + rfilename);
 		 console.log('workbook is : '+ typeof workbook);
 		 write_filepath= path.join(__dirname + half_filepath) ;
 
@@ -98,10 +103,11 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 
 			//logic for ch assessments
 			console.log('user requested for a CH rawdata file');
-					var setup = {cells : {col_srt: 'M9', col_end: 'AD9', srv_srt: 'B9', srv_end:'L9'},//depending on switch case
+			var cells = wb_new.getWorkBookSectionStart();
+					var setup = {cells : wb_new.cells,//depending on switch case
 					filepath_wb: write_filepath,
 					wb_name : wfilename,
-					workbk: workbook,
+					workbk: workbook,//remove when cell addresses are the reference to the start points for the xlsx file
 					wb_options: raw_file_options
 
 				};
@@ -231,6 +237,22 @@ rawdataRouter.route('/ch_download/:filename')
 		}
 		 
 	});
+
+rawdataRouter.route('/showworkbook')
+	.get(function(req,res){
+		console.log('showworkbook route called');
+		var file2 = path.join(__dirname + '/uploads/wb_testing.xlsx');
+		/*console.log('file location : '+ readfile2);*/
+		 /*var workbook22 = XLSX.readFile(readfile2);*/
+		 //res.send(workbook22);
+		 wb_new = new wb_custom(); 
+		 wb_new = wb_new.setNewWorkBook('CH', 'SECTION1','StaffTraining');
+		 XLSX.writeFile(wb_new, file2);
+       //res.send(wb_new);
+
+		 
+	});
+		
 
 /*
 
