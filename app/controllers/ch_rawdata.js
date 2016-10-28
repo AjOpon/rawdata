@@ -8,7 +8,8 @@
  var Assessment = require('../models/assessment');//Get the DB model for Assessments
  var Facility = require('../models/facility');//Get the DB model for facilities
  const ver1 = 'CHV1', ver2 = 'CHV2', 
- 	StaffTrainingRowPat = 'CHV2SEC1BLK1RW';//setup the survey versionsas  constants.
+ 	StaffTrainingRowPat = 'CHV2SEC1BLK1RW',
+ 	HealthServicesRowPat = 'CHV2SEC1BLK2RW';//setup the survey versionsas  constants.
 
  function CH_RawData(setupInfo){ // initialize the CH_RAwData object 
   this.cells= setupInfo.cells; //cells for start postions on workbook
@@ -122,6 +123,7 @@ function getWbQuery(options){// client specified options
  };
 
 
+
  CH_RawData.prototype.getCHAssessments = function(cb){
  	//function to initiate all other functions of CH_RawData used to write workbooks
  self = this; //store reference to original CH-RawData Object
@@ -210,38 +212,37 @@ function getWbQuery(options){// client specified options
 					 			self.comp_dets = sync.await(self.getFaciDets(null,facidets2,sync.defer())); //Get organized facility deltails in row order plus assesmnet info
 					 			console.log('self.comp_dets is : '+ typeof self.comp_dets);
 					 			/*
-									switch case for the sec_row pattern to apply (sane switch case for the section option.)
+									switch case for the sec_row pattern to apply (sane switch case for the section option.
+									here we have a switch for each possible section option e.g
+									setStaffTraining
+									setHealthServices
+									etc
 					 			*/
 					 			switch(self.wb_options.surv_secTitle){
 										case 'StaffTraining':
 										//setExcel for StaffTraining
 										console.log('Prepping the excel for StaffTraining');
 										self.sec_rows = sync.await(self.getRowsArray(self.cur_surv,StaffTrainingRowPat,sync.defer()));//Get neatly arranged section rows with orderly columns
-					 					console.log('On to the next..');
+					 					//console.log('On to the next..');
 							 			console.log(self.sec_rows);
 						 				self.wb = sync.await(self.setStaffTrainingExcel(self.wb, self.cur_surv, self.sec_rows, self.cells, sync.defer())) ;//add current survey to workbook object
 										
 										break;
+
 										case 'HealthServices':
 										//setExcel for HealthServices
-										return;
+										console.log('Prepping the excel for HealthServices');
+										self.sec_rows = sync.await(self.getRowsArray(self.cur_surv,HealthServicesRowPat,sync.defer()));//Get neatly arranged section rows with orderly columns
+										console.log(self.sec_rows);
+						 				self.wb = sync.await(self.setHealthServicesExcel(self.wb, self.cur_surv, self.sec_rows, self.cells, sync.defer())) ;//add current survey to workbook object
+										
 										break;
 										default:
 										console.log('Unable to determinethe survey section name');
 										return;
 									}
 					 			
-				 				/* 
-									here we will have a switch for each possible section option e.g
-									setStaffTraining
-									setHealthServices
-									etc
-
-									switch(wb_options.surv_secTitle){
-		
-									}
-									
-				 				*/
+				 		
 				 				console.log('cur_surv_count test = '+ self.cur_surv_count);
 			 				}
 			 				else if(self.cur_surv_count == self.total_survs) {//if the last survey in the array has been removed
@@ -472,7 +473,7 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 				 console.log('name of first sheet is : ' + first_sheet);
 				 var worksheet = wbk.Sheets[first_sheet];//get the first sheet e.g CH
 
-				if(Array.isArray(s_datakeys) &&  typeof faciDets != undefined && typeof faciDets != undefined ){
+				if(Array.isArray(s_datakeys) &&  typeof faciDets != undefined && typeof faciDets != null ){ 
 
 					var col_srt = srt_stp.col_srt, col_end = srt_stp.col_end, //cell starting and ending column for survey.Data
 					srv_srt = srt_stp.srv_srt, srv_end = srt_stp.srv_end;//cell start and end point for the facility data in the wb
@@ -550,14 +551,14 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 						col_dataky++;//increment value to obtain next col_dataky containing next column item from current s_datakeys row array
 					};
 
-					nxt_rw = de_col_srt.r + 1; //increment the row to move to the next row in the worksheet
+					var nxt_rw = de_col_srt.r + 1; //increment the row to move to the next row in the worksheet
 
 					var nw_colsrt = {c:de_col_srt.c , r:nxt_rw },nw_colend = {c:de_col_end.c , r:nxt_rw },
 						 nw_srvsrt = {c:de_srv_srt.c , r:nxt_rw }, nw_srvend ={c:de_srv_end.c , r:nxt_rw } ;
-					en_nw_colsrt = XLSX.utils.encode_cell(nw_colsrt);//encode new start to add next survey in the following row on worksheet
-					en_nw_colend = XLSX.utils.encode_cell(nw_colend);
-					en_nw_srvsrt = XLSX.utils.encode_cell(nw_srvsrt);
-					en_nw_srvend = XLSX.utils.encode_cell(nw_srvend);
+					var en_nw_colsrt = XLSX.utils.encode_cell(nw_colsrt);//encode new start to add next survey in the following row on worksheet
+					var en_nw_colend = XLSX.utils.encode_cell(nw_colend);
+					var en_nw_srvsrt = XLSX.utils.encode_cell(nw_srvsrt);
+					var en_nw_srvend = XLSX.utils.encode_cell(nw_srvend);
 					
 
 					 self.cells = {col_srt: en_nw_colsrt ,col_end: en_nw_colend ,
@@ -608,6 +609,140 @@ CH_RawData.prototype.getSecDataKeys = function(fsum_datakeys,pattern){
 		 
 		 
 		};
+
+	CH_RawData.prototype.setHealthServicesExcel = function (wbk,ch_surv,s_datakeys,srt_stp, cb){ 
+
+		self = this;
+		console.log('Launching setHealthServicesExcel');
+
+		if(typeof ch_surv == 'object' && typeof ch_surv != null && typeof wbk != undefined && typeof wbk != null && typeof s_datakeys != null && typeof s_datakeys != undefined)
+			{	
+				var faciDets = self.comp_dets;// complete organised facility information
+				console.log('faciDets is : '+ typeof faciDets);
+				var work_buch = {};
+				var first_sheet = wbk.SheetNames[0];//get the name of the first sheet in the wb being read by XLSX
+				 console.log('name of first sheet is : ' + first_sheet);
+				 var worksheet = wbk.Sheets[first_sheet];//get the first sheet e.g CH
+
+				if(Array.isArray(s_datakeys) &&  typeof faciDets != undefined && typeof faciDets != null ){ 
+
+					var col_srt = srt_stp.col_srt, col_end = srt_stp.col_end, //cell starting and ending column for survey.Data
+					srv_srt = srt_stp.srv_srt, srv_end = srt_stp.srv_end;//cell start and end point for the facility data in the wb
+					console.log('col_srt = '+ col_srt + ' col_end = '+ col_end);
+					console.log('srv_srt = '+ srv_srt + ' srv_end = '+ srv_end)
+					var de_col_srt = XLSX.utils.decode_cell(col_srt);//decode the start into an object of its row and col value {c: , r :  }
+					var de_col_end = XLSX.utils.decode_cell(col_end);
+					var de_srv_srt = XLSX.utils.decode_cell(srv_srt);
+					var de_srv_end = XLSX.utils.decode_cell(srv_end);
+					console.log('displaying decoded col_srt : ');
+					console.log(de_col_srt);
+					console.log('displaying decoded col_end: ');
+					console.log(de_col_end);
+					console.log('displaying decoded de_srv_srt :  ');
+					console.log(de_srv_srt);
+					console.log('displaying decoded de_srv_end: ');
+					console.log(de_srv_end);
+
+					var cur_col= de_col_srt.c,//set cur_col to the start etc
+						cur_col_srv =de_srv_srt.c,//set cur_col for the facility section of the wb
+						col_dataky = 2,
+						last_col = de_col_end.c,
+						last_col_srv = de_srv_end.c,
+						cur_rw = de_col_srt.r;//set current row
+					console.log('cur_col  = '+ cur_col);
+
+
+					for (; cur_col_srv <= last_col_srv;) {//for first cell for facility details to last
+							for (var i = 0; i < faciDets.length;) { // run through each value for Facility details
+								console.log(faciDets);
+								var cell_add_faci= {c:cur_col_srv,r:cur_rw};
+								var en_cell_add_faci = XLSX.utils.encode_cell(cell_add_faci); //encode back to cell name value e.g M9
+								console.log('Writing to cell address '+ en_cell_add_faci);	
+								worksheet[en_cell_add_faci] = {v:faciDets[i], t:'s'};//assign the value of faciDets to a worksheet cell
+								/*console.log('datakey_rc : '+ datakey_rc);
+								console.log('val_datakey_rc : ' + val_datakey_rc);
+								worksheet[en_cell_add] = {v:val_datakey_rc, t:'s'};*///safe_val instead of val_datakey_rc
+								cur_col_srv++;
+								i++;
+							};
+						};
+					for(; cur_col<= last_col;){
+						var cell_add= {c:cur_col,r:cur_rw};
+						var en_cell_add = XLSX.utils.encode_cell(cell_add); //e.g M9
+					 	var datakey_rc = s_datakeys[0];
+					 	var val_datakey_rc = ch_surv.Data[datakey_rc];
+					 	var safe_val = surv_getHealthServiceOptionString(val_datakey_rc);
+
+					 	if (safe_val != undefined ) {
+									console.log('datakey_rc : '+ datakey_rc);
+									console.log('safe_val : ' + safe_val);
+									worksheet[en_cell_add] = { v:safe_val, t:'n'};
+								}else{
+									console.log('safe_val at datakey_rc: '+ datakey_rc + 'was undefined');
+									console.log('val_datakey_rc : ' + val_datakey_rc);
+									break;
+								}
+						cur_col++;
+
+						if (cur_col == last_col && cur_col_srv==last_col_srv) {
+								console.log('done with current survey');
+								console.log('moving on');
+
+							}
+
+						console.log('cur_col: '+ cur_col);
+						console.log('cur_col_srv: '+ cur_col_srv);
+					};
+
+					var nxt_rw = de_col_srt.r + 1; //increment the row to move to the next row in the worksheet
+
+					var nw_colsrt = {c:de_col_srt.c , r:nxt_rw },nw_colend = {c:de_col_end.c , r:nxt_rw },
+						 nw_srvsrt = {c:de_srv_srt.c , r:nxt_rw }, nw_srvend ={c:de_srv_end.c , r:nxt_rw } ;
+					var en_nw_colsrt = XLSX.utils.encode_cell(nw_colsrt);//encode new start to add next survey in the following row on worksheet
+					var en_nw_colend = XLSX.utils.encode_cell(nw_colend);
+					var en_nw_srvsrt = XLSX.utils.encode_cell(nw_srvsrt);
+					var en_nw_srvend = XLSX.utils.encode_cell(nw_srvend);
+					
+
+					 self.cells = {col_srt: en_nw_colsrt ,col_end: en_nw_colend ,
+					 			srv_srt: en_nw_srvsrt , srv_end: en_nw_srvend };//assign CH_RawData.cells new value for next row
+					 work_buch.wb = wbk;//wb with updated rows and columns
+					 console.log('new start cells: ');
+					 console.log(self.cells);
+					 console.log('written current survey stuff to the row');
+					 
+					 console.log('cur_surv_count is: ' + self.cur_surv_count);
+					 if(!(self.cur_surv_count >= self.total_survs)){//if self.cur_surv_count is still less than total number of surveys
+					 	console.log('returning the wb');
+					 	console.log('Bring the next one in for writing');
+					 	self.cur_surv_count+=1;
+					 	self.wb_ready = false;//workbook status is still incomplete
+					 	cb(null,work_buch.wb) ;//cb return updated workbook
+					 }
+					 else if((self.cur_surv_count == self.total_survs)){// if at last survey
+					 	console.log('total_survs = '+ self.total_survs);
+					 	self.wb_ready = true;// update workbook completion status
+					 	console.log('we are at an end : self.cur_surv_count == self.total_survs ');
+					 	return cb(null,work_buch.wb) ; //return completed workbook
+					 }
+					 else{
+					 	//incase for some reason the cur_surv_count is greater than actual total_number
+					 	console.log('self.cur_surv_count ('+ self.cur_surv_count + ') is >= self.total_survs ');
+					 	return;
+					 }
+
+				}
+				else {
+				console.log('Error:  s_datakeys not survey or missing facility information for survey');
+				return;
+				}
+			}
+			else {
+				console.log('Error with ch_surv / wbk /s_datakeys make sure they are variables with values');
+				return;
+			}
+
+	};
 
 	CH_RawData.prototype.writeSec1Book =  function( wb_sec1,writepath_sec1,wb_name,cb ){
 		/*
@@ -795,6 +930,92 @@ function surv_datatypeCheck(val_datakey_rc){
 	 				console.log(val_datakey_rc);
 	 				return undefined ;
 	 	}
+};
+
+function surv_getHealthServiceOptionString(val_datakey_rc){
+
+	if(typeof val_datakey_rc != 'undefined' && val_datakey_rc != null ){
+
+	 		if(!Array.isArray(val_datakey_rc)){//if not an array
+	 			if(typeof val_datakey_rc === 'number' || typeof val_datakey_rc === 'string'){
+	 				//console.log(' val_datakey_rc is a number or string');
+	 				return val_datakey_rc;
+
+	 			}
+	 		}
+	 		else{//its an array
+	 			console.log('array coming through');
+	 			console.log(val_datakey_rc);
+	 			var arraystring='';
+	 			if(val_datakey_rc.length == 1){
+
+	 				return arraystring = HealthServicesSingleOptString(val_datakey_rc[0]);
+	 			}
+	 			else if(val_datakey_rc.length > 1){
+
+	 				for (var i = 0; i < val_datakey_rc.length; i++) {
+	 					if(i == 0){
+	 						arraystring += HealthServicesSingleOptString(val_datakey_rc[i]) + " ," ;
+	 					} else if(i > 0 && i != (val_datakey_rc.length - 1)){
+	 						arraystring +=  HealthServicesSingleOptString(val_datakey_rc[i]) + ", " ;
+	 					}
+	 					else{
+	 						arraystring += HealthServicesSingleOptString(val_datakey_rc[i]);
+	 					}
+	 					
+	 				};
+
+	 				return arraystring;
+	 			}
+	 			else{
+
+	 				console.log('the array for HealthServices Selected option had no item');
+	 			}
+	 			
+
+	 		}
+	 	}
+	 	else{
+	 				console.log('val_datakey_rc was undefined or null for HealthServices');
+	 				console.log('val_datakey_rc value is : ');
+	 				console.log(val_datakey_rc);
+	 				return undefined ;
+	 	}
+
+};
+
+function HealthServicesSingleOptString(health_serv_arr_item){
+	var arraystring = "";
+	switch(health_serv_arr_item){
+			
+		case '1':
+	 		arraystring = 'General OPD';
+	 		return arraystring;
+	 		break;
+	 	case '2': 
+	 		arraystring = 'Paediatric OPD';
+	 		return arraystring;
+	 		break;
+	 	case '3':
+	 		arraystring = 'MCH';
+	 		return arraystring;
+	 		break;
+	 	case '-1':
+	 		arraystring = 'Paediatric OPD';
+	 		return arraystring;
+	 		break;
+	 	case "No information provided":
+	 		arraystring = health_serv_arr_item;
+	 		return arraystring;
+	 		break;
+	 	case "":
+	 		arraystring = 'Other ';
+	 	default:
+	 		console.log('No valid option for HealthServices selected Option array');
+	 		console.log('Returning string itself');
+	 		return health_serv_arr_item;			
+
+	}
 };
  	/*Assessment.
  	find(query_s, function(err,assessments){

@@ -58,13 +58,15 @@
 					      <div class="list-group">
 						      <div class="container-fluid" style="margin-top: 5px; margin-bottom: 5px; align:center;">
 							      	<div class="btn-group-vertical" role="group" aria-label="Section 1 CH Blocks">
-								  <button class="btn btn-info sec-opt" type="button" id = 'Sec1FaciSumm' sec-opt-val = 'FacilitySummary'><label for="">
-								  	Facility Summary <span class="glyphicon glyphicon-menu-right"></span>
-								  </label> 	
-								  </button >
+								 
 							      <button  class="btn btn-info sec-opt" type="button" id = 'Sec1StaffTraining' sec-opt-val = 'StaffTraining'> 
 								  	<label>Staff Training <span class="glyphicon glyphicon-menu-right"></span> </label>
 							      </button >
+
+							       <button class="btn btn-info sec-opt" type="button" id = 'Sec1HealthServices' sec-opt-val = 'HealthServices'><label for="">
+								  	Health Services <span class="glyphicon glyphicon-menu-right"></span>
+								  </label> 	
+								  </button >
 									</div>
 						      </div>
 					      </div>
@@ -185,10 +187,11 @@
 				<div id="dialog-message" title="Download" class="hidden">
 					  <p id="d-message">
 					    <span class="" style="float:left; margin:0 7px 50px 0;"></span>
-					    Generating requested excel...
+					    <b>Generating requested excel... </b>
+					    <span id= "spinner_gen"class="glyphicon glyphicon-refresh glyphicon-spin"></span>
 					  </p>
 					  <button id="dl_btn" class="btn btn-success hidden" >
-							<a id= 'downloadit' href="" target="_bla">
+							<a id= 'downloadit' href="" target="_blank">
 							Download Excel
 							</a>
 					</button>

@@ -1,9 +1,14 @@
   XLSX = require('XLSX');
   path = require('path');
 
+const StaffTrainingCellStart = { col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', srv_end:'L4' },
+ HealthServicesCellStart = { col_srt: 'M4', col_end: 'M4', srv_srt: 'B4', srv_end:'L4' };
+
+
+
 	function wb_custom(){
 	 console.log('new wb custom obj');
-	 this.cells = {col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', srv_end:'L4'};
+	 //this.cells = {col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', srv_end:'L4'};
 	 
 	};
  wb_custom.prototype.setNewWorkBook= function (survey_type, survey_section,sectionTitleDes ){ 
@@ -14,6 +19,7 @@
  				case 'SECTION1':
  				if(sectionTitleDes == 'StaffTraining' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){
  					// myworkbook is the setNewWorkBook function (survey type, survey section )
+ 					this.cells = StaffTrainingCellStart;
  					myworkbook = {};
 					myworkbook.SheetNames = ["CH"];//stores sheetnames as strings
 					myworkbook.Sheets = {};
@@ -69,10 +75,56 @@
 					return myworkbook;// return the wb object with the sheets and sheetnames setup
 
 
- 				}else{
- 					console.log('another part of ch section 1 was selected. You need to check which one');
+ 				}else if(sectionTitleDes == 'HealthServices' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){
+
+ 					this.cells = HealthServicesCellStart;
+ 					myworkbook = {};
+					myworkbook.SheetNames = ["CH"];//stores sheetnames as strings
+					myworkbook.Sheets = {};
+					myworkbook.Sheets['CH'] = {};
+					myworkbook.Sheets['CH']['!ref'] = "A1:M1000";
+
+					var sec1Row1Titles = ["Health Services"];
+					var sec1Row2Titles = [ "County","Sub County","MFL No","Facility Name","Level","Type","Owner","Date of Assessment"
+						,"Assessment Type","Version","Assessment Term", "Where are sick children seen?" ];
+					var HealthServicesCell = "B2";
+					var de_HealthServicesTtl =  XLSX.utils.decode_cell(HealthServicesCell);//get {c: , r :  }
+					var de_ttlBelowHealthServices= {c:de_HealthServicesTtl.c,r:de_HealthServicesTtl.r+1};// i.e next row in {c: , r: }
+
+					for (var i = 0; i < sec1Row1Titles.length; i++) {// for each title item 
+						if(i == 0){
+							myworkbook.Sheets['CH'][HealthServicesCell] = {v: sec1Row1Titles[0], t : 's'};
+
+						}
+
+					};
+
+					for (var k = 0; k < sec1Row2Titles.length; k++) {
+							
+							var en_belowHealthServices = XLSX.utils.encode_cell(de_ttlBelowHealthServices);//C2
+							console.log('en_belowStaff: '+ en_belowHealthServices);
+							myworkbook.Sheets['CH'][en_belowHealthServices] = {v: sec1Row2Titles[k], t: 's'};
+							de_ttlBelowHealthServices = {c:de_ttlBelowHealthServices.c+1,r:de_ttlBelowHealthServices.r};
+
+
+						};
+					//stores generated sheets
+					console.log('en_belowHealthServices : ' + en_belowHealthServices);
+
+					return myworkbook;// return the wb object with the sheets and sheetnames setup
+
+
+
+ 				} else{
+
+ 					console.log('Unknown section selected');
+ 					return;
 
  				}
+
+ 				
+ 				break;
+ 				 
  			}
  			break;
  		case'MNH': 
@@ -88,7 +140,14 @@
 wb_custom.prototype.getWorkBookSectionStart = function (){
 	console.log('this.cells');
 	console.log(this.cells);
-	return this.cells;
+	if(typeof this.cells != null && typeof this.cells != undefined)
+	{
+		return this.cells;
+	}
+	else{
+		console.log("section start was undefined");
+		return undefined;
+	}
 
 };
 

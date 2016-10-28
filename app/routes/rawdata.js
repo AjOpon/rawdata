@@ -36,29 +36,8 @@ console.log('Showing the request body');
 console.log(raw_file_options); // raw_data obj from client
 if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 {
-	var maxSurv = parseInt(raw_file_options.surv_max);
-
-		switch (maxSurv){
-
-			case 100:
-				rfilename = 'sec1_temp100.xlsx';
-				break;
-			case 200: 
-				rfilename = 'sec1_temp200.xlsx';
-				break;
-			case 500: 
-				rfilename = 'sec1_temp500.xlsx';
-				break;
-			case 1000:
-				rfilename = 'sec1_temp1000.xlsx';
-				break;
-			default :
-				rfilename = 'sec1_temp100.xlsx';
-				break;
-
-		}
+	
 		 //req objects to be set by client side controller
-		 readfile= path.join(__dirname+ "/uploads/"+ rfilename) ;
 		 filterstring = raw_file_options.surv_max + raw_file_options.surv_ver;
 		 if(raw_file_options.tog_term == 'true' || raw_file_options.tog_county== 'true'){
 		 	if(raw_file_options.tog_term == 'true' && raw_file_options.tog_county == 'false'){
@@ -76,35 +55,23 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 		 	}
 		 }
 
-		 wfilename= raw_file_options.gen_name+ filterstring + '.xlsx';// SurvVer+ SurvMax+ [..SurvTerm, ..SurvCounty] + '.xlsx'
+		 wfilename= raw_file_options.gen_name+ filterstring + '.xlsx';// SurvVer+ SurvMax+ [..SurvTerm, ..SurvCounty] + '.xlsx' name of excel file
 
 		console.log('filterstring : '+ filterstring);
 
 		 
 
 		half_filepath = "/uploads/" + wfilename ; 
-		console.log('file location : '+ readfile);
-		  var wb_new = new wb_custom(); //empty workbook object
-		  wb_new = wb_new.setNewWorkBook('CH', 'SECTION1','StaffTraining');
-		 var workbook = wb_new; //replace with encoding cells for the XLSX file , using a workbook object instead
-		 /*
-		 	Setup workbook object.
-		 	Range, sheetnames etc.
-
-		 	check workbook_custom
-		 */
-		 //console.log('reading from ' + rfilename);
+		//console.log('file location : '+ readfile);
+		  var wb_new = new wb_custom(); //new workbook object
+		  var workbook = wb_new.setNewWorkBook(raw_file_options.surv_Title, raw_file_options.surv_Sec,raw_file_options.surv_secTitle);//e.g ('CH', 'SECTION1', 'StaffTraining');
+		 
 		 console.log('workbook is : '+ typeof workbook);
 		 write_filepath= path.join(__dirname + half_filepath) ;
 
-	switch(raw_file_options.surv_Title){//determine type of survey being requested e.g CH
+		 var cells = wb_new.getWorkBookSectionStart();//get start position for facility cells and section data value cells
 
-		case 'CH':
-
-			//logic for ch assessments
-			console.log('user requested for a CH rawdata file');
-			var cells = wb_new.getWorkBookSectionStart();
-					var setup = {cells : wb_new.cells,//depending on switch case
+		 var setup = { cells : cells,//depending on switch case
 					filepath_wb: write_filepath,
 					wb_name : wfilename,
 					workbk: workbook,//remove when cell addresses are the reference to the start points for the xlsx file
@@ -112,18 +79,24 @@ if(typeof raw_file_options != undefined && typeof raw_file_options != null)
 
 				};
 
+	switch(raw_file_options.surv_Title){//determine type of survey being requested e.g CH
+
+		case 'CH':
+
+			//logic for ch assessments
+			console.log('user requested for a CH rawdata file');
+			
+
 				console.log('setup.workbk is: '+ typeof setup.workbk);
 
 				var ch_rawdata = new CHRawData(setup);//change logic to depend on switch case
-
-
 
 				sync.fiber(function(){
 					write_dets1 = sync.await(ch_rawdata.getCHAssessments(sync.defer())) ;
 					console.log('write_dets1 is : '+ typeof write_dets1);
 					
 					
-					if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null'){
+					if(typeof write_dets1 === 'object' && typeof write_dets1 !== 'null' && typeof write_dets1 != undefined){
 						console.log(write_dets1.write_filepath);
 						console.log('Found xlsx file for download');
 						//res.download(write_dets1.write_filepath);

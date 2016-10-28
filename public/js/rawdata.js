@@ -133,7 +133,7 @@ $('#FiltTitle').text('None');
 		var raw_data = new RawData(rd_setup);
 		console.log('Attempting to Generate RawData...');
 		GenerateRawData(raw_data);
-
+		$(".ui-dialog-buttonset").addClass('hidden');
 		$('#dialog-message').removeClass('hidden');
 		$( function() {
 				    $( "#dialog-message" ).dialog({
@@ -251,6 +251,7 @@ GenerateRawData = function(obj){
  				$( "#dialog-message" ).prop('title','Downloaded');
  				$('#downloadit').attr('href', cur_wblink);
  				$('#d-message').html('File was successfully generated! Click the download button below');
+ 				$(".ui-dialog-buttonset").removeClass('hidden');
  				$( function() {
 				    $( "#dialog-message" ).dialog({
 				      modal: true,
@@ -260,8 +261,11 @@ GenerateRawData = function(obj){
 				          $('#downloadit').attr('href', '#');
 				          $('#dl_btn').addClass('hidden');
 				          $(this).addClass('hidden');
-				          $('#d-message').html('Generating requested excel...');
+				          $('#d-message').html('<span class="" style="float:left; margin:0 7px 50px 0;"></span>'+
+						    '<b>Generating requested excel... </b>'+
+						    '<span id= "spinner_gen"class="glyphicon glyphicon-refresh glyphicon-spin"></span>');
 				          $( "#gen_rd2" ).removeClass('hidden');
+				          $(".ui-dialog-buttonset").addClass('hidden');
 				        }
 				      }
 				    });
