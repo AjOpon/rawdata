@@ -72,30 +72,33 @@
 					      </div>
 					    </div>
 					  </div>
-					  <!-- <div class="panel panel-default">
+					   <div class="panel panel-default">
 					    <div class="panel-heading" role="tab" id="headingTwo">
 					      <h4 class="panel-title">
-					        <a class="collapsed sec-selecta" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-					          SECTION 2
+					        <a role="button" class="sec-selecta" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo" sec-val = 'SECTION2'>
+					        SECTION 2
 					        </a>
 					      </h4>
 					    </div>
-					    <div id="collapseTwo"  class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+					    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
 					      <div class="list-group">
-					     
-					  							<div class="container-fluid" style="margin-top: 5px; margin-bottom: 5px; align:center;">
-					  							      	<div class="btn-group-vertical" role="group" aria-label="Section 1 CH Blocks">
-					  								  <button class="btn btn-info sec-opt" type="button" id = 'Sec1FaciSumm'><label for="">
-					  								  	Facility Summary <span class="glyphicon glyphicon-menu-right"></span>
-					  								  </label> </button >
-					  							      <button  class="btn btn-info sec-opt" type="button" id = 'Sec1StaffTraining'><label for=""> Staff Training <span class="glyphicon glyphicon-menu-right"></span></label>  </button >
-					  									</div>
-					  						      </div>
-					  							
+						      <div class="container-fluid" style="margin-top: 5px; margin-bottom: 5px; align:center;">
+							      	<div class="btn-group-vertical" role="group" aria-label="Section 2 CH Blocks">
+								 
+							      <button  class="btn btn-info sec-opt" type="button" id = 'Sec2GuidelinesJobAidsAvail' sec-opt-val = 'GuidelinesJobAidAvailability'> 
+								  	<label>Guidelines And Job Aid Availability <span class="glyphicon glyphicon-menu-right"></span> </label>
+							      </button >
+
+							       <button class="btn btn-info sec-opt" type="button" id = 'Sec2ToolsAvail' sec-opt-val = 'ToolsAvailability'><label for="">
+								  	Tools Availability <span class="glyphicon glyphicon-menu-right"></span>
+								  </label> 	
+								  </button >
+									</div>
+						      </div>
 					      </div>
 					    </div>
 					  </div>
-					  <div class="panel panel-default">
+					  <!-- <div class="panel panel-default">
 					    <div class="panel-heading" role="tab" id="headingThree">
 					      <h4 class="panel-title">
 					        <a class="collapsed sec-selecta" class="sec-selecta" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
@@ -139,7 +142,7 @@
 							<label for="SurVer">Survey Version: </label>
 							  <select class="form-control" id="SurVer" >
 							    <option value="V2">V2</option>
-							    <option value="V1">V1</option>
+							    <!-- <option value="V1">V1</option> -->
 							    
 							    <!-- <option value="All"></option> -->
 							  </select>	

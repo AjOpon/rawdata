@@ -3,7 +3,8 @@
 
 const StaffTrainingCellStart = { col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', srv_end:'L4' },
  HealthServicesCellStart = { col_srt: 'M4', col_end: 'M4', srv_srt: 'B4', srv_end:'L4' };
-
+ GuidelinesJobAidAvailabilityStart = { col_srt: 'M4', col_end: 'T4', srv_srt: 'B4', srv_end:'L4' },
+ToolsAvailabilityStart =  { col_srt: 'M4', col_end: 'T4', srv_srt: 'B4', srv_end:'L4' };
 
 
 	function wb_custom(){
@@ -13,11 +14,11 @@ const StaffTrainingCellStart = { col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', s
 	};
  wb_custom.prototype.setNewWorkBook= function (survey_type, survey_section,sectionTitleDes ){ 
  	self = this;
- 	switch(survey_type){
- 		case 'CH': 
- 			switch(survey_section){
+ 	switch(survey_type){ 
+ 		case 'CH':  
+ 			switch(survey_section){ 
  				case 'SECTION1':
- 				if(sectionTitleDes == 'StaffTraining' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){
+ 				if(sectionTitleDes == 'StaffTraining' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){ 
  					// myworkbook is the setNewWorkBook function (survey type, survey section )
  					this.cells = StaffTrainingCellStart;
  					myworkbook = {};
@@ -123,6 +124,80 @@ const StaffTrainingCellStart = { col_srt: 'M4', col_end: 'AD4', srv_srt: 'B4', s
  				}
 
  				
+ 				break;
+
+ 				case 'SECTION2':
+ 					if(sectionTitleDes == 'GuidelinesJobAidAvailability' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){
+
+ 						this.cells = GuidelinesJobAidAvailabilityStart;
+		 					myworkbook = {};
+							myworkbook.SheetNames = ["CH"];//stores sheetnames as strings
+							myworkbook.Sheets = {};
+							myworkbook.Sheets['CH'] = {};
+							myworkbook.Sheets['CH']['!ref'] = "A1:T1000";
+
+							var sec1Row1Titles = ["Guidelines & Job Aids Availability"];
+							var sec1Row2Titles = [ "County","Sub County","MFL No","Facility Name","Level","Type","Owner","Date of Assessment"
+							,"Assessment Type","Version","Assessment Term", "2012 IMCI Guidelines" , "ORT Guidelines", "ICCM", "Paediatric Protocol 2010/2013",
+							"Diarrhoea Management Job Aid", "IEC Materials", "ART Guidelines", "EID Algorithm 2009/12/14 "];
+
+							var GuidelinesJobAidCell = "B2";
+							var de_GuidelinesJobAidCell = XLSX.utils.decode_cell(GuidelinesJobAidCell);//get {c: , r :  }
+							var de_ttlBelowGuidelinesJobAid = {c:de_HealthServicesTtl.c,r:de_HealthServicesTtl.r+1};// i.e next row in {c: , r: }
+
+							//set heading / title cell
+							myworkbook.Sheets['CH'][GuidelinesJobAidCell] = {v: sec1Row1Titles[0], t : 's'};
+
+							for (var k = 0; k < sec1Row2Titles.length; k++) {
+							
+							var en_ttlBelowGuidelinesJobAid = XLSX.utils.encode_cell(de_ttlBelowGuidelinesJobAid);//C2
+							console.log('en_ttlBelowGuidelinesJobAid: '+ en_ttlBelowGuidelinesJobAid);
+							myworkbook.Sheets['CH'][en_ttlBelowGuidelinesJobAid] = {v: sec1Row2Titles[k], t: 's'};
+							de_ttlBelowGuidelinesJobAid = {c:de_ttlBelowGuidelinesJobAid.c+1,r:de_ttlBelowGuidelinesJobAid.r};
+
+
+								};
+
+							return myworkbook;// return the wb object with the sheets and sheetnames setup
+
+
+
+ 					} else if(sectionTitleDes == 'ToolsAvailability' && typeof sectionTitleDes != null && typeof sectionTitleDes != undefined){
+
+ 						this.cells = ToolsAvailabilityStart;
+		 					myworkbook = {};
+							myworkbook.SheetNames = ["CH"];//stores sheetnames as strings
+							myworkbook.Sheets = {};
+							myworkbook.Sheets['CH'] = {};
+							myworkbook.Sheets['CH']['!ref'] = "A1:T10000";
+
+							var sec1Row1Titles = ["Tools Availability"];
+							var sec1Row2Titles = [ "County","Sub County","MFL No","Facility Name","Level","Type","Owner","Date of Assessment"
+							,"Assessment Type","Version","Assessment Term", "EID Register" , "Under 5 Register", "ORT Corner Register (Improvised)", "Mother Child Booklet",
+							"ORT Corner Register (MoH)", "IMCI Case Recording Form", "Referral Slips", " ICCM Tools "];
+
+							var ToolsAvailabilityCell = "B2";
+							var de_ToolsAvailabilityCell = XLSX.utils.decode_cell(ToolsAvailabilityCell);//get {c: , r :  }
+							var de_ttlBelowToolsAvailability = {c:de_ToolsAvailabilityCell.c,r:de_ToolsAvailabilityCell.r+1};// i.e next row in {c: , r: }
+							
+							myworkbook.Sheets['CH'][ToolsAvailabilityCell] = {v: sec1Row1Titles[0], t : 's'};
+
+							for (var k = 0; k < sec1Row2Titles.length; k++){
+								var en_ttlBelowToolsAvailability = XLSX.utils.encode_cell(de_ToolsAvailabilityCell);
+								console.log('en_ttlBelowToolsAvailability: '+ en_ttlBelowToolsAvailability);
+								myworkbook.Sheets['CH'][en_ttlBelowToolsAvailability] = {v: sec1Row2Titles[k], t: 's'};
+								de_ttlBelowToolsAvailability = {c:de_ttlBelowToolsAvailability.c+1,r:de_ttlBelowToolsAvailability.r};
+
+							};
+
+
+
+
+ 					} else{
+ 						console.log('no valid section 2 chv2 section selected to prepare custom workbook');
+ 						return;
+ 					}
+
  				break;
  				 
  			}
