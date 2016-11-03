@@ -1,0 +1,26 @@
+#Node base image from ubuntu/precise LTS release
+FROM nodesource/precise:argon
+
+#Name image author
+MAINTAINER Ogiste Opon
+
+#create app directory to add application files 
+RUN mkdir /usr/src/rawdata/
+
+#Default dir for CMD execution
+WORKDIR /usr/src/rawdata/
+
+#Add current directory's content
+COPY . /usr/src/rawdata/
+
+
+#install npm packages from package.json
+RUN pwd
+RUN npm update 
+
+
+# Set port exposed to host
+EXPOSE 3005
+
+#command to begin server
+CMD ["node","server.js"]

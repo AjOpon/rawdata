@@ -1,0 +1,6 @@
+
+#ignore mnch guide for rawdata
+./app/routes/uploads/mnchrawdata.xlsx
+
+#ignore node_modules directory
+node_modules

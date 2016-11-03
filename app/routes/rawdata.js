@@ -2,7 +2,7 @@
 
  var Assessment = require('../models/assessment'),
  path = require('path'),
- XLSX = require('XLSX'),
+ XLSX = require('xlsx'),
  CHRawData = require('../controllers/ch_rawdata');
  wb_custom = require('../controllers/workbook_custom');
 var fs = require('fs');

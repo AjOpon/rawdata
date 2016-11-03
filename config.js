@@ -1,8 +1,11 @@
+require('dotenv').config();
+
+
 module.exports= {
-	'database' : 'mongodb://localhost/lstrip',
- 	'port' : 3005,//port for server requests
+	'database' : process.env.DB_URL,
+ 	'port' : process.env.DB_PORT,//port for server requests
  	'mongoptions' : {
-	  'user': 'opon',
-	  'pass': 'childish95'
+	  'user': process.env.DB_USER,
+	  'pass': process.env.DB_PSWD
 	} 
 };

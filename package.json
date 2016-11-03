@@ -1,20 +1,25 @@
 {
   "name": "rawdata",
   "version": "1.0.0",
-  "description": "'mnch rawdata for chv1'",
+  "description": "'mnch rawdata for chv2'",
   "main": "server.js",
   "scripts": {
     "test": "grunt test"
   },
-  "author": "alfred opon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AjOpon/rawdata.git"
+  },
+  "author": "alfred ogiste opon",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.15.2",
     "bower": "^1.7.9",
+    "dotenv": "^2.0.0",
     "express": "^4.14.0",
-    "galaxy": "^0.1.12",
     "mongoose": "^4.5.10",
     "morgan": "^1.7.0",
+    "nodemon": "^1.11.0",
     "path": "^0.12.7",
     "synchronize": "^2.0.0",
     "xlsx": "^0.8.0"
