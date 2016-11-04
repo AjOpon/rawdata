@@ -11,6 +11,7 @@ https= require('https'), //set up server with express
  bodyParser=require('body-parser'),
  mongoose=require('mongoose');
 
+require('dotenv').config();
 /* mongoptions = config.mongoptions,
  database= config.database;*/
 
@@ -53,7 +54,7 @@ app.get('/', function(req,res){
 });
 
 //specify express port and host address
-http.createServer(app).listen(config.port,'0.0.0.0');
+http.createServer(app).listen(config.port,process.env.APP_URL);
 
 //report progress
 console.log('Server started and listening on ' + config.port);
