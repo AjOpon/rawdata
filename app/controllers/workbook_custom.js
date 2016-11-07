@@ -190,7 +190,7 @@ ToolsAvailabilityStart =  { col_srt: 'M4', col_end: 'T4', srv_srt: 'B4', srv_end
 
 							};
 
-
+							return myworkbook;// return the wb object with the sheets and sheetnames setup
 
 
  					} else{

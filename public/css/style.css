@@ -18,6 +18,18 @@
 	margin: 5px;
 }
 
+.surv,#surv_radio{
+    background-color: #3c8dbc;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #fff;
+}
+
+.radio label, .checkbox label{
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
 #instruct{
 	color: #e22929;
 	font-size: 16px;
